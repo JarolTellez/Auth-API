@@ -21,6 +21,8 @@ Thumbs.db
 # Spring Boot / Configuration
 /src/main/resources/application.yml
 /src/main/resources/application-*.yml
+application*.yml
+application*.properties
 
 # JWT / Security / Secrets
 *.jks
