@@ -9,10 +9,6 @@ import lombok.Data;
 public class RegisterRequest {
 
     @NotBlank
-    @Size(max = 150)
-    private String name;
-
-    @NotBlank
     @Size(max = 50)
     private String username;
 
