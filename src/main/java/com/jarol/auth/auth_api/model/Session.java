@@ -7,6 +7,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
 
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
@@ -22,26 +23,32 @@ public class Session {
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
-    @Column(nullable = false)
-    private String refreshToken;
+    @Column(nullable = false, length = 255)
+    private String refreshTokenHash;
 
     @Column(length = 100)
     private String deviceInfo;
 
+    @Column(length = 45)
     private String ipAddress;
 
+    @Column(length = 1024)
     private String userAgent;
 
     @CreationTimestamp
-    private LocalDateTime createdAt;
+    private Instant createdAt;
 
-    private LocalDateTime lastUsedAt;
-
-    @Column(nullable = false)
-    private LocalDateTime expiresAt;
+    @Column
+    private Instant lastUsedAt;
 
     @Column(nullable = false)
-    private Boolean revoked;
+    private Instant expiresAt;
+
+    @Column(nullable = false)
+    private Boolean revoked = false;
+
+    @Column
+    private Instant revokedAt;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
