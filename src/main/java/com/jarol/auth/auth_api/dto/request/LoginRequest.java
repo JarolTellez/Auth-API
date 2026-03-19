@@ -23,13 +23,5 @@ public class LoginRequest {
     @Size(min = 8, max = 50)
     private String password;
 
-    @Size(max = 255)
-    private String deviceInfo;
-
-    @Size(max = 39)
-    private String ipAddress;
-
-    @Size(max = 512)
-    private String userAgent;
 
 }
