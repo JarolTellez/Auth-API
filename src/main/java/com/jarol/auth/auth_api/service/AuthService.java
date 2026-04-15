@@ -1,5 +1,7 @@
 package com.jarol.auth.auth_api.service;
 
+import com.jarol.auth.auth_api.config.JwtProperties;
+import com.jarol.auth.auth_api.dto.request.LoginRequest;
 import com.jarol.auth.auth_api.dto.request.RegisterRequest;
 import com.jarol.auth.auth_api.dto.response.AuthResponse;
 import com.jarol.auth.auth_api.dto.response.UserResponse;
@@ -25,6 +27,7 @@ public class AuthService implements IAuthService {
     private final IRoleRepository roleRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
+    private final JwtProperties jwtProperties;
 
     private final IUserMapper userMapper;
     private final IAuthMapper authMapper;
@@ -39,6 +42,7 @@ public class AuthService implements IAuthService {
 
         user.setPassword(passwordEncoder.encode(request.getPassword()));
 
+        //MOVER EL "USER" A UNA VARIABLE DE ENTORNO
         Role roleUser = roleRepository.findByName("USER")
                 .orElseThrow(() -> new RuntimeException("Role not found"));
 
@@ -49,9 +53,17 @@ public class AuthService implements IAuthService {
         String accessToken = jwtService.generateAccessToken(savedUser);
         String refreshToken = jwtService.generateRefreshToken(savedUser);
 
+        // Calcular la fecha antes de llamar al mapper osea guardarlo en una variable y ya pasarselo al mapper
         return authMapper.userToAuthResponse(savedUser, accessToken, refreshToken,
-                LocalDateTime.now().plus(Duration.ofMillis(jwtService.getRefreshExpiration())));
+                LocalDateTime.now().plus(Duration.ofMillis(jwtProperties.getRefreshExpiration())));
 
 
     }
+
+    @Override
+    public AuthResponse login(LoginRequest request) {
+
+    }
+
+
 }

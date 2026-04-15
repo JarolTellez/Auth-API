@@ -1,10 +1,7 @@
 package com.jarol.auth.auth_api.model;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.Instant;
@@ -17,6 +14,7 @@ import java.util.UUID;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 public class Session {
 
     @Id
@@ -27,7 +25,7 @@ public class Session {
     private String refreshTokenHash;
 
     @Column(length = 100)
-    private String deviceInfo;
+    private String deviceName;
 
     @Column(length = 45)
     private String ipAddress;
