@@ -24,14 +24,20 @@ public class Session {
     @Column(nullable = false, length = 255)
     private String refreshTokenHash;
 
-    @Column(length = 100)
-    private String deviceName;
-
     @Column(length = 45)
     private String ipAddress;
 
     @Column(length = 1024)
     private String userAgent;
+
+    @Column(length = 100)
+    private String deviceType;
+
+    @Column(length = 45)
+    private String os;
+
+    @Column(length = 45)
+    private String browser;
 
     @CreationTimestamp
     private Instant createdAt;
