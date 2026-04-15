@@ -29,17 +29,18 @@ public class JwtService {
 
 
     public String generateAccessToken(User user, UUID sessionId) {
-        return buildToken(user, sessionId, jwtProperties.getAccessExpiration());
+        return buildToken(user, sessionId, jwtProperties.getAccessExpiration(), jwtProperties.getAccessType());
     }
 
     public String generateRefreshToken(User user, UUID sessionId) {
-        return buildToken(user, sessionId, jwtProperties.getRefreshExpiration());
+        return buildToken(user, sessionId, jwtProperties.getRefreshExpiration(), jwtProperties.getRefreshType());
     }
 
-    private String buildToken(User user, UUID sessionId, long expiration) {
+    private String buildToken(User user, UUID sessionId, long expiration, String type) {
         return Jwts.builder()
                 .subject(user.getId().toString())
                 .claim("sessionId", sessionId.toString())
+                .claim("type", type)
                 .issuedAt(new Date())
                 .expiration(new Date(System.currentTimeMillis() + expiration))
                 .signWith(getSignKey())
