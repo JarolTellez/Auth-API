@@ -11,6 +11,7 @@ import com.jarol.auth.auth_api.model.Role;
 import com.jarol.auth.auth_api.model.User;
 import com.jarol.auth.auth_api.repository.IRoleRepository;
 import com.jarol.auth.auth_api.repository.IUserRepository;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -33,7 +34,7 @@ public class AuthService implements IAuthService {
     private final IAuthMapper authMapper;
 
     @Override
-    public AuthResponse register(RegisterRequest request) {
+    public AuthResponse register(RegisterRequest request, HttpServletRequest httpRequest) {
         if (userRepository.existsByEmail(request.getEmail())) {
             throw new RuntimeException("Email already registered");
         }
@@ -50,18 +51,25 @@ public class AuthService implements IAuthService {
 
         User savedUser = userRepository.save(user);
 
-        String accessToken = jwtService.generateAccessToken(savedUser);
-        String refreshToken = jwtService.generateRefreshToken(savedUser);
-
-        // Calcular la fecha antes de llamar al mapper osea guardarlo en una variable y ya pasarselo al mapper
-        return authMapper.userToAuthResponse(savedUser, accessToken, refreshToken,
-                LocalDateTime.now().plus(Duration.ofMillis(jwtProperties.getRefreshExpiration())));
+       return createSessionAndTokens(savedUser);
 
 
     }
 
     @Override
     public AuthResponse login(LoginRequest request) {
+
+    }
+
+    private AuthResponse createSessionAndTokens(User user){
+
+        String accessToken = jwtService.generateAccessToken(user);
+        String refreshToken = jwtService.generateRefreshToken(user);
+
+        // Calcular la fecha antes de llamar al mapper osea guardarlo en una variable y ya pasarselo al mapper
+        return authMapper.userToAuthResponse(user, accessToken, refreshToken,
+                LocalDateTime.now().plus(Duration.ofMillis(jwtProperties.getRefreshExpiration())));
+
 
     }
 

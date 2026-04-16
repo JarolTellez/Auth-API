@@ -1,5 +1,8 @@
 package com.jarol.auth.auth_api.model;
 
+import com.jarol.auth.auth_api.model.enums.Browser;
+import com.jarol.auth.auth_api.model.enums.DeviceType;
+import com.jarol.auth.auth_api.model.enums.OS;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
@@ -30,14 +33,17 @@ public class Session {
     @Column(length = 1024)
     private String userAgent;
 
-    @Column(length = 100)
-    private String deviceType;
+    @Enumerated(EnumType.STRING)
+    @Column(length = 20)
+    private DeviceType deviceType;
 
-    @Column(length = 45)
-    private String os;
+    @Enumerated(EnumType.STRING)
+    @Column(length = 20)
+    private OS os;
 
-    @Column(length = 45)
-    private String browser;
+    @Enumerated(EnumType.STRING)
+    @Column(length = 20)
+    private Browser browser;
 
     @CreationTimestamp
     private Instant createdAt;

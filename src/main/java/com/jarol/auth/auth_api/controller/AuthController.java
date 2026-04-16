@@ -3,6 +3,7 @@ package com.jarol.auth.auth_api.controller;
 import com.jarol.auth.auth_api.dto.request.RegisterRequest;
 import com.jarol.auth.auth_api.dto.response.AuthResponse;
 import com.jarol.auth.auth_api.service.IAuthService;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
@@ -21,8 +22,8 @@ public class AuthController {
     private  final IAuthService authService;
 
     @PostMapping("register")
-    public ResponseEntity<AuthResponse> register(@Valid @RequestBody RegisterRequest request){
-        AuthResponse response = authService.register(request);
+    public ResponseEntity<AuthResponse> register(@Valid @RequestBody RegisterRequest request, HttpServletRequest httpRequest){
+        AuthResponse response = authService.register(request, httpRequest);
         return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
 }
