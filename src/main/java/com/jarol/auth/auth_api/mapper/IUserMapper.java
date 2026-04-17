@@ -45,7 +45,7 @@ public interface IUserMapper {
         if (roles == null) return null;
 
         return roles.stream()
-                .map(Role::getName)
+                .map(role -> role.getName().name())
                 .collect(Collectors.toSet());
     }
 

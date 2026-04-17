@@ -54,7 +54,7 @@ public class AuthService implements IAuthService {
 
     @Override
     public AuthResponse login(LoginRequest request) {
-
+      return AuthResponse.builder().build();
     }
 
 

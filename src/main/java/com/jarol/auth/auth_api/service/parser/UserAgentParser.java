@@ -15,9 +15,9 @@ public class UserAgentParser {
                 ipAddress = "UNKNOWN";
             }
             return new SessionMetadata(ipAddress, "UNKNOWN",
-                    "UNKNOWN",
-                    "UNKNOWN",
-                    "UNKNOWN");
+                    DeviceType.UNKNOWN,
+                    OS.UNKNOWN,
+                    Browser.UNKNOWN);
         }
 
         String userAgentLowerCase = userAgent.toLowerCase();
