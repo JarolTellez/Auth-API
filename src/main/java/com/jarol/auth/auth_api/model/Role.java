@@ -1,5 +1,6 @@
 package com.jarol.auth.auth_api.model;
 
+import com.jarol.auth.auth_api.model.enums.EnumRole;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -18,8 +19,9 @@ public class Role {
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
+    @Enumerated(EnumType.STRING)
     @Column(unique = true, nullable = false, length = 50)
-    private String name;
+    private EnumRole name;
 
     private String description;
 

@@ -8,5 +8,5 @@ import java.util.UUID;
 
 public interface IUserService {
 
-User create(RegisterRequest request);
+User createUser(RegisterRequest request);
 }

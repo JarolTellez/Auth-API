@@ -21,7 +21,6 @@ import java.util.UUID;
 public class Session {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
     @Column(nullable = false, length = 255)
@@ -55,7 +54,7 @@ public class Session {
     private Instant expiresAt;
 
     @Column(nullable = false)
-    private Boolean revoked = false;
+    private boolean revoked = false;
 
     @Column
     private Instant revokedAt;

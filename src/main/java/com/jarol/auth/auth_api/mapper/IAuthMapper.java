@@ -5,6 +5,7 @@ import com.jarol.auth.auth_api.model.User;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
+import java.time.Instant;
 import java.time.LocalDateTime;
 
 /**
@@ -32,5 +33,5 @@ public interface IAuthMapper {
     @Mapping(target = "accessToken", source = "accessToken")
     @Mapping(target = "refreshToken", source = "refreshToken")
     @Mapping(target = "refreshTokenExpiresAt", source = "refreshTokenExpiresAt")
-    AuthResponse userToAuthResponse(User user, String accessToken, String refreshToken, LocalDateTime refreshTokenExpiresAt);
+    AuthResponse userToAuthResponse(User user, String accessToken, String refreshToken, Instant refreshTokenExpiresAt);
 }

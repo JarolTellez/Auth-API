@@ -8,52 +8,48 @@ import com.jarol.auth.auth_api.dto.response.UserResponse;
 import com.jarol.auth.auth_api.mapper.IAuthMapper;
 import com.jarol.auth.auth_api.mapper.IUserMapper;
 import com.jarol.auth.auth_api.model.Role;
+import com.jarol.auth.auth_api.model.Session;
 import com.jarol.auth.auth_api.model.User;
+import com.jarol.auth.auth_api.model.enums.EnumRole;
+import com.jarol.auth.auth_api.model.valueObject.SessionMetadata;
 import com.jarol.auth.auth_api.repository.IRoleRepository;
+import com.jarol.auth.auth_api.repository.ISessionRepository;
 import com.jarol.auth.auth_api.repository.IUserRepository;
+import com.jarol.auth.auth_api.service.parser.UserAgentParser;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.time.Duration;
+import java.time.Instant;
 import java.time.LocalDateTime;
+import java.util.HexFormat;
 import java.util.Set;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
 public class AuthService implements IAuthService {
 
-    private final IUserRepository userRepository;
-    private final IRoleRepository roleRepository;
-    private final PasswordEncoder passwordEncoder;
-    private final JwtService jwtService;
-    private final JwtProperties jwtProperties;
+    private final IUserService userService;
+    private final ISessionService sessionService;
 
-    private final IUserMapper userMapper;
-    private final IAuthMapper authMapper;
-
+    @Transactional
     @Override
     public AuthResponse register(RegisterRequest request, HttpServletRequest httpRequest) {
-        if (userRepository.existsByEmail(request.getEmail())) {
-            throw new RuntimeException("Email already registered");
-        }
 
-        User user = userMapper.registerRequestToUser(request);
+        String userAgent= httpRequest.getHeader("User-Agent");
+        String ip = extractIp(httpRequest);
 
-        user.setPassword(passwordEncoder.encode(request.getPassword()));
+        User user = userService.createUser(request);
 
-        //MOVER EL "USER" A UNA VARIABLE DE ENTORNO
-        Role roleUser = roleRepository.findByName("USER")
-                .orElseThrow(() -> new RuntimeException("Role not found"));
-
-        user.setRoles(Set.of(roleUser));
-
-        User savedUser = userRepository.save(user);
-
-       return createSessionAndTokens(savedUser);
-
-
+        AuthResponse response= sessionService.createSessionAndTokens(user,userAgent,ip);
+        return response;
     }
 
     @Override
@@ -61,17 +57,19 @@ public class AuthService implements IAuthService {
 
     }
 
-    private AuthResponse createSessionAndTokens(User user){
 
-        String accessToken = jwtService.generateAccessToken(user);
-        String refreshToken = jwtService.generateRefreshToken(user);
+    private String extractIp(HttpServletRequest httpRequest){
+        String ip= httpRequest.getHeader("X-Forwarded-For");
 
-        // Calcular la fecha antes de llamar al mapper osea guardarlo en una variable y ya pasarselo al mapper
-        return authMapper.userToAuthResponse(user, accessToken, refreshToken,
-                LocalDateTime.now().plus(Duration.ofMillis(jwtProperties.getRefreshExpiration())));
+        if(ip != null && !ip.isBlank()){
+            return ip.split(",")[0].trim();
+        }
 
+        return httpRequest.getRemoteAddr();
 
     }
+
+
 
 
 }

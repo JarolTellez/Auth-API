@@ -8,10 +8,15 @@ import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.crypto.bcrypt.BCrypt;
 import org.springframework.stereotype.Service;
 
 import javax.crypto.SecretKey;
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.Date;
+import java.util.HexFormat;
 import java.util.UUID;
 
 @Service
@@ -51,13 +56,13 @@ public class JwtService {
         return key;
     }
 
-    public String extractUsername(String token) {
+    public String extractUserId(String token) {
         return extractClaims(token).getSubject();
     }
 
     public boolean isTokenValid(String token, User user) {
-        final String username = extractUsername(token);
-        return username.equals(user.getEmail()) && !isTokenExpired(token);
+        final String userId = extractUserId(token);
+        return userId.equals(user.getId().toString()) && !isTokenExpired(token);
     }
 
     public boolean isTokenExpired(String token) {
@@ -71,4 +76,5 @@ public class JwtService {
                 .parseSignedClaims(token)
                 .getPayload();
     }
+
 }
