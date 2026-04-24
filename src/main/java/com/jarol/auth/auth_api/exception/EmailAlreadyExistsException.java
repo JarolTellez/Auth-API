@@ -1,0 +1,14 @@
+package com.jarol.auth.auth_api.exception;
+
+import org.springframework.http.HttpStatus;
+
+public class EmailAlreadyExistsException extends  BussinesException{
+
+    public EmailAlreadyExistsException(String email){
+        super(
+                "Email already exists: " + email,
+                "EMAIL_ALREADY_EXISTS",
+                HttpStatus.CONFLICT
+        );
+    }
+}
