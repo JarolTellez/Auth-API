@@ -7,7 +7,7 @@ public class EmailAlreadyExistsException extends  BussinesException{
     public EmailAlreadyExistsException(String email){
         super(
                 "Email already exists: " + email,
-                "EMAIL_ALREADY_EXISTS",
+                ErrorCode.EMAIL_ALREADY_EXISTS,
                 HttpStatus.CONFLICT
         );
     }

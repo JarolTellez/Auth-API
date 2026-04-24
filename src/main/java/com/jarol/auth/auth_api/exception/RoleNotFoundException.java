@@ -8,7 +8,7 @@ public class RoleNotFoundException extends BussinesException {
     protected RoleNotFoundException(EnumRole role) {
         super(
                 "Role not found: " + role,
-                "ROLE_NOT_FOUND",
+                ErrorCode.ROLE_NOT_FOUND,
                 HttpStatus.NOT_FOUND
         );
     }

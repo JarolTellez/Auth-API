@@ -17,7 +17,7 @@ public class GlobalExceptionHandler {
 
         ApiError error = ApiError.builder()
                 .status(ex.getStatus().value())
-                .errorCode(ex.getErrorCode())
+                .errorCode(ex.getErrorCode().name())
                 .message(ex.getMessage())
                 .timestamp(Instant.now())
                 .path(request.getRequestURI())
