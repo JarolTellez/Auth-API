@@ -14,12 +14,12 @@ import lombok.ToString;
 @ToString(exclude = "password")
 public class LoginRequest {
 
-    @NotBlank
+    @NotBlank(message = "Identifier is required")
     @Email
     @Size(max = 255)
-    private String email;
+    private String identifier;
 
-    @NotBlank
+    @NotBlank(message = "Password is required")
     @Size(min = 8, max = 50)
     private String password;
 
