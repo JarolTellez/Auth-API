@@ -14,4 +14,5 @@ public class ApiError {
     private String message;
     private Instant timestamp;
     private String path;
+    private Object details;
 }

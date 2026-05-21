@@ -1,9 +1,14 @@
 package com.jarol.auth.auth_api.exception;
 
 public enum ErrorCode {
+    INVALID_CREDENTIALS,
+    USER_NOT_FOUND,
     EMAIL_ALREADY_EXISTS,
     ROLE_NOT_FOUND,
     VALIDATION_ERROR,
     INTERNAL_SERVER_ERROR,
-    INVALID_PARAMETERS
+    INVALID_PARAMETERS,
+    INVALID_TOKEN,
+    TOKEN_EXPIRED,
+    ACCESS_DENIED
 }

@@ -9,4 +9,6 @@ import java.util.UUID;
 public interface IUserService {
 
 User createUser(RegisterRequest request);
+
+User getByIdentifier(String identifier);
 }

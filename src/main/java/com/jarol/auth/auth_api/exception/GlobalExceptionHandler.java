@@ -19,8 +19,8 @@ import java.util.Map;
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
-    @ExceptionHandler(BussinesException.class)
-    public ResponseEntity<ApiError> handleBussinessException(BussinesException ex, HttpServletRequest request) {
+    @ExceptionHandler(BusinessException.class)
+    public ResponseEntity<ApiError> handleBusinessException(BusinessException ex, HttpServletRequest request) {
         log.warn("Bussiness error: {}", ex.getMessage());
 
         ApiError error = ApiError.builder()
@@ -34,6 +34,7 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(ex.getStatus()).body(error);
     }
 
+    @ExceptionHandler(Exception.class)
     public ResponseEntity<ApiError> handleGenericException(Exception ex, HttpServletRequest request) {
         log.error("Unexpected error", ex);
 
@@ -63,7 +64,8 @@ public class GlobalExceptionHandler {
             ApiError error = ApiError.builder()
                     .status(HttpStatus.BAD_REQUEST.value())
                     .errorCode(ErrorCode.VALIDATION_ERROR.name())
-                    .message(errors.toString())
+                    .message("Validation failed")
+                    .details(errors)
                     .timestamp(Instant.now())
                     .path(request.getRequestURI())
                     .build();
@@ -78,12 +80,21 @@ public class GlobalExceptionHandler {
             ConstraintViolationException ex,
             HttpServletRequest request) {
 
+        Map<String, String> errors = new HashMap<>();
+
+        ex.getConstraintViolations().forEach(violation->{
+            errors.put(
+                    violation.getPropertyPath().toString(),
+                    violation.getMessage()
+            );
+        });
         log.warn("Constraint violation: {}", ex.getMessage());
 
         ApiError error = ApiError.builder()
                 .status(HttpStatus.BAD_REQUEST.value())
                 .errorCode(ErrorCode.INVALID_PARAMETERS.name())
-                .message(ex.getMessage())
+                .message("Invalid request parameters")
+                .details(errors)
                 .timestamp(Instant.now())
                 .path(request.getRequestURI())
                 .build();

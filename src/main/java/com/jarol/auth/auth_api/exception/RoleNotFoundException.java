@@ -3,9 +3,9 @@ package com.jarol.auth.auth_api.exception;
 import com.jarol.auth.auth_api.model.enums.EnumRole;
 import org.springframework.http.HttpStatus;
 
-public class RoleNotFoundException extends BussinesException {
+public class RoleNotFoundException extends BusinessException {
 
-    protected RoleNotFoundException(EnumRole role) {
+    public RoleNotFoundException(EnumRole role) {
         super(
                 "Role not found: " + role,
                 ErrorCode.ROLE_NOT_FOUND,

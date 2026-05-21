@@ -42,4 +42,9 @@ public class UserService implements  IUserService{
         return savedUser;
 
     }
+
+    @Override
+    public User getByIdentifier(String identifier) {
+        return userRepository.findByEmailOrUsername(identifier,identifier).orElseThrow(()->new RuntimeException("User not found"));
+    }
 }
