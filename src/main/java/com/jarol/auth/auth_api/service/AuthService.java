@@ -5,6 +5,7 @@ import com.jarol.auth.auth_api.dto.request.LoginRequest;
 import com.jarol.auth.auth_api.dto.request.RegisterRequest;
 import com.jarol.auth.auth_api.dto.response.AuthResponse;
 import com.jarol.auth.auth_api.dto.response.UserResponse;
+import com.jarol.auth.auth_api.exception.InvalidCredentialsException;
 import com.jarol.auth.auth_api.mapper.IAuthMapper;
 import com.jarol.auth.auth_api.mapper.IUserMapper;
 import com.jarol.auth.auth_api.model.Role;
@@ -38,38 +39,47 @@ public class AuthService implements IAuthService {
 
     private final IUserService userService;
     private final ISessionService sessionService;
+    private final PasswordEncoder passwordEncoder;
 
     @Transactional
     @Override
     public AuthResponse register(RegisterRequest request, HttpServletRequest httpRequest) {
 
-        String userAgent= httpRequest.getHeader("User-Agent");
+        String userAgent = httpRequest.getHeader("User-Agent");
         String ip = extractIp(httpRequest);
 
         User user = userService.createUser(request);
 
-        AuthResponse response= sessionService.createSessionAndTokens(user,userAgent,ip);
-        return response;
+        return  sessionService.createSessionAndTokens(user, userAgent, ip);
     }
 
     @Override
-    public AuthResponse login(LoginRequest request) {
-      return AuthResponse.builder().build();
+    public AuthResponse login(LoginRequest request, HttpServletRequest httpRequest) {
+        String userAgent = httpRequest.getHeader("User-Agent");
+        String ip = extractIp(httpRequest);
+        User user = userService.getUserByIdentifier(request.getIdentifier());
+
+        if (!passwordEncoder.matches(
+                request.getPassword(),
+                user.getPassword()
+        )) {
+            throw new InvalidCredentialsException();
+        }
+
+        return sessionService.createSessionAndTokens(user, userAgent, ip);
     }
 
 
-    private String extractIp(HttpServletRequest httpRequest){
-        String ip= httpRequest.getHeader("X-Forwarded-For");
+    private String extractIp(HttpServletRequest httpRequest) {
+        String ip = httpRequest.getHeader("X-Forwarded-For");
 
-        if(ip != null && !ip.isBlank()){
+        if (ip != null && !ip.isBlank()) {
             return ip.split(",")[0].trim();
         }
 
         return httpRequest.getRemoteAddr();
 
     }
-
-
 
 
 }

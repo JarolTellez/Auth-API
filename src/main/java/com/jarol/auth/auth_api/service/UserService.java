@@ -1,6 +1,9 @@
 package com.jarol.auth.auth_api.service;
 
 import com.jarol.auth.auth_api.dto.request.RegisterRequest;
+import com.jarol.auth.auth_api.exception.EmailAlreadyExistsException;
+import com.jarol.auth.auth_api.exception.RoleNotFoundException;
+import com.jarol.auth.auth_api.exception.UserNotFoundException;
 import com.jarol.auth.auth_api.mapper.IUserMapper;
 import com.jarol.auth.auth_api.model.Role;
 import com.jarol.auth.auth_api.model.User;
@@ -15,7 +18,7 @@ import java.util.Set;
 
 @Service
 @RequiredArgsConstructor
-public class UserService implements  IUserService{
+public class UserService implements IUserService {
 
     private final IUserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
@@ -25,7 +28,7 @@ public class UserService implements  IUserService{
     @Override
     public User createUser(RegisterRequest request) {
         if (userRepository.existsByEmail(request.getEmail())) {
-            throw new RuntimeException("Email already registered");
+            throw new EmailAlreadyExistsException(request.getEmail());
         }
 
         User user = userMapper.registerRequestToUser(request);
@@ -33,18 +36,21 @@ public class UserService implements  IUserService{
         user.setPassword(passwordEncoder.encode(request.getPassword()));
 
         Role roleUser = roleRepository.findByName(EnumRole.USER)
-                .orElseThrow(() -> new RuntimeException("Role not found"));
+                .orElseThrow(() -> new RoleNotFoundException(EnumRole.USER));
 
         user.setRoles(Set.of(roleUser));
 
-        User savedUser = userRepository.save(user);
+        return userRepository.save(user);
 
-        return savedUser;
 
     }
 
     @Override
-    public User getByIdentifier(String identifier) {
-        return userRepository.findByEmailOrUsername(identifier,identifier).orElseThrow(()->new RuntimeException("User not found"));
+    public User getUserByIdentifier(String identifier) {
+        return userRepository
+                .findByEmailOrUsername(identifier, identifier)
+                .orElseThrow(() ->
+                        new UserNotFoundException(identifier)
+                );
     }
 }

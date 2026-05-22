@@ -6,9 +6,9 @@ import java.util.UUID;
 
 public class UserNotFoundException extends BusinessException {
 
-    public UserNotFoundException(UUID id){
+    public UserNotFoundException(String identifier){
         super(
-                "User not found with id: "+id,
+                "User not found: "+identifier,
                 ErrorCode.USER_NOT_FOUND,
                 HttpStatus.NOT_FOUND
         );

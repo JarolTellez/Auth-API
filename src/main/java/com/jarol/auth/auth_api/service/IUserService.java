@@ -10,5 +10,5 @@ public interface IUserService {
 
 User createUser(RegisterRequest request);
 
-User getByIdentifier(String identifier);
+User getUserByIdentifier(String identifier);
 }
