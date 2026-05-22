@@ -4,6 +4,7 @@ import com.jarol.auth.auth_api.dto.request.RegisterRequest;
 import com.jarol.auth.auth_api.exception.EmailAlreadyExistsException;
 import com.jarol.auth.auth_api.exception.RoleNotFoundException;
 import com.jarol.auth.auth_api.exception.UserNotFoundException;
+import com.jarol.auth.auth_api.exception.UsernameAlreadyExistsException;
 import com.jarol.auth.auth_api.mapper.IUserMapper;
 import com.jarol.auth.auth_api.model.Role;
 import com.jarol.auth.auth_api.model.User;
@@ -29,6 +30,10 @@ public class UserService implements IUserService {
     public User createUser(RegisterRequest request) {
         if (userRepository.existsByEmail(request.getEmail())) {
             throw new EmailAlreadyExistsException(request.getEmail());
+        }
+
+        if(userRepository.existsByUsername(request.getUsername())){
+            throw new UsernameAlreadyExistsException(request.getUsername());
         }
 
         User user = userMapper.registerRequestToUser(request);

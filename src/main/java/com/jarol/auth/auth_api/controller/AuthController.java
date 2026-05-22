@@ -25,10 +25,12 @@ public class AuthController {
     @PostMapping("register")
     public ResponseEntity<AuthResponse> register(@Valid @RequestBody RegisterRequest request, HttpServletRequest httpRequest){
         AuthResponse response = authService.register(request, httpRequest);
-        return new ResponseEntity<>(response, HttpStatus.CREATED);
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
-    public ResponseEntity<AuthResponse> login(@Valid @RequestBody LoginRequest request, HttpServletRequest httpServletRequest){
-
+    @PostMapping("login")
+    public ResponseEntity<AuthResponse> login(@Valid @RequestBody LoginRequest request, HttpServletRequest httpRequest){
+        AuthResponse response = authService.login(request, httpRequest);
+        return ResponseEntity.ok(response);
     }
 }
