@@ -17,6 +17,7 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Date;
 import java.util.HexFormat;
+import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -45,6 +46,8 @@ public class JwtService {
         return Jwts.builder()
                 .subject(user.getId().toString())
                 .claim("sessionId", sessionId.toString())
+                .claim("username", user.getUsername())
+                .claim("roles", user.getRoles().stream().map(role -> "ROLE_"+ role.getName().name()).toList())
                 .claim("type", type)
                 .issuedAt(new Date())
                 .expiration(new Date(System.currentTimeMillis() + expiration))
@@ -63,15 +66,29 @@ public class JwtService {
     public UUID extractSessionId(String token) {
         return UUID.fromString(extractClaims(token).get("sessionId", String.class));
     }
-
-    public boolean isTokenValid(String token, User user) {
-        final UUID userId = extractUserId(token);
-        return userId.equals(user.getId().toString()) && !isTokenExpired(token);
+    public String extractEmail(String token) {
+        return extractClaims(token).get("email", String.class);
     }
 
-    public boolean isTokenExpired(String token) {
-        return extractClaims(token).getExpiration().before(new Date());
+    public String extractUsername(String token) {
+        return extractClaims(token).get("username", String.class);
     }
+    public List<String> extractRoles(String token) {
+        return extractClaims(token).get("roles", List.class);
+    }
+
+    public boolean isTokenValid(String token) {
+        try {
+            Claims claims = extractClaims(token);
+
+            String type = claims.get("type", String.class);
+            return jwtProperties.getAccessType().equals(type) && claims.getExpiration().after(new Date());
+        } catch (Exception ex) {
+            return false;
+        }
+
+    }
+
 
     private Claims extractClaims(String token) {
         return Jwts.parser()

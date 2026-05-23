@@ -15,7 +15,7 @@ public class CustomUserDetails implements UserDetails {
 
     private final UUID userId;
     private final UUID sessionId;
-    private final String identifier;
+    private final  String username;
     private final Collection<? extends GrantedAuthority> authorities;
 
     @Override
@@ -23,8 +23,7 @@ public class CustomUserDetails implements UserDetails {
         return null;
     }
 
-    @Override
-    public String getUsername() {
-        return identifier;
-    }
+
+
+
 }
