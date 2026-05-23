@@ -1,5 +1,6 @@
 package com.jarol.auth.auth_api.controller;
 
+import com.jarol.auth.auth_api.config.CustomUserDetails;
 import com.jarol.auth.auth_api.dto.request.LoginRequest;
 import com.jarol.auth.auth_api.dto.request.LogoutRequest;
 import com.jarol.auth.auth_api.dto.request.RegisterRequest;
@@ -8,9 +9,11 @@ import com.jarol.auth.auth_api.service.IAuthService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.apache.tomcat.util.net.openssl.ciphers.Authentication;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -33,9 +36,9 @@ public class AuthController {
     }
 
     @PostMapping("logout")
-    public ResponseEntity<?> logout(@Valid @RequestBody LogoutRequest request){
+    public ResponseEntity<?> logout(@AuthenticationPrincipal CustomUserDetails user){
 
-        authService.logout(request.getRefreshToken());
+        authService.logout(user.getSessionId());
         return ResponseEntity.ok("Logged out successfully");
     }
 }

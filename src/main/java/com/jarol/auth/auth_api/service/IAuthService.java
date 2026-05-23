@@ -5,10 +5,12 @@ import com.jarol.auth.auth_api.dto.request.RegisterRequest;
 import com.jarol.auth.auth_api.dto.response.AuthResponse;
 import jakarta.servlet.http.HttpServletRequest;
 
+import java.util.UUID;
+
 public interface IAuthService {
 
     AuthResponse register(RegisterRequest request, HttpServletRequest httpRequest);
     AuthResponse login(LoginRequest request,HttpServletRequest httpRequest);
-    void logout(String refreshToken);
+    void logout(UUID sessionId);
 
 }

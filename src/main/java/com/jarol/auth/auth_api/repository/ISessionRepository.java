@@ -10,4 +10,5 @@ public interface ISessionRepository extends JpaRepository<Session, UUID> {
 
 
     Optional<Session> findByRefreshTokenHash(String token);
+
 }

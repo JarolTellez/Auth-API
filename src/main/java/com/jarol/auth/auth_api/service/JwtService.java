@@ -56,12 +56,16 @@ public class JwtService {
         return key;
     }
 
-    public String extractUserId(String token) {
-        return extractClaims(token).getSubject();
+    public UUID extractUserId(String token) {
+        return UUID.fromString(extractClaims(token).getSubject());
+    }
+
+    public UUID extractSessionId(String token) {
+        return UUID.fromString(extractClaims(token).get("sessionId", String.class));
     }
 
     public boolean isTokenValid(String token, User user) {
-        final String userId = extractUserId(token);
+        final UUID userId = extractUserId(token);
         return userId.equals(user.getId().toString()) && !isTokenExpired(token);
     }
 

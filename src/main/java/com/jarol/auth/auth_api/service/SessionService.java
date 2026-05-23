@@ -4,6 +4,7 @@ import com.jarol.auth.auth_api.config.JwtProperties;
 import com.jarol.auth.auth_api.dto.response.AuthResponse;
 import com.jarol.auth.auth_api.exception.InvalidCredentialsException;
 import com.jarol.auth.auth_api.exception.InvalidTokenException;
+import com.jarol.auth.auth_api.exception.SessionNotFoundException;
 import com.jarol.auth.auth_api.mapper.IAuthMapper;
 import com.jarol.auth.auth_api.model.Session;
 import com.jarol.auth.auth_api.model.User;
@@ -63,19 +64,20 @@ public class SessionService implements ISessionService {
     }
 
     @Override
-    public void revokeSessionByRefreshToken(String refreshToken) {
-        Session session = getSessionByRefreshToken(refreshToken);
+    public void revokeSessionBySessionId(UUID sessionId) {
+        Session session = getSessionBySessionId(sessionId);
+        if(session.isRevoked()){
+            return;
+        }
         session.setRevoked(true);
-
+        session.setRevokedAt(Instant.now());
         sessionRepository.save(session);
-
     }
 
     @Override
-    public Session getSessionByRefreshToken(String refreshToken) {
-        String refreshTokenHash = hashRefreshToken(refreshToken);
-        return sessionRepository.findByRefreshTokenHash(refreshTokenHash).orElseThrow(() ->
-                new InvalidTokenException()
+    public Session getSessionBySessionId(UUID sessionId) {
+        return sessionRepository.findById(sessionId).orElseThrow(() ->
+                new SessionNotFoundException()
         );
     }
 

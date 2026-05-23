@@ -5,9 +5,12 @@ import com.jarol.auth.auth_api.model.Session;
 import com.jarol.auth.auth_api.model.User;
 import com.jarol.auth.auth_api.model.valueObject.SessionMetadata;
 
+import java.util.UUID;
+
+
 public interface ISessionService {
 
    AuthResponse createSessionAndTokens(User user, String userAgent, String ip);
-   void revokeSessionByRefreshToken(String refreshToken);
-   Session getSessionByRefreshToken(String refreshToken);
+   void revokeSessionBySessionId(UUID sessionId);
+   Session getSessionBySessionId(UUID sessionId);
 }

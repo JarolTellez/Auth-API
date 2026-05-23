@@ -17,6 +17,7 @@ import com.jarol.auth.auth_api.repository.IRoleRepository;
 import com.jarol.auth.auth_api.repository.ISessionRepository;
 import com.jarol.auth.auth_api.repository.IUserRepository;
 import com.jarol.auth.auth_api.service.parser.UserAgentParser;
+import io.jsonwebtoken.Jwt;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -40,6 +41,7 @@ public class AuthService implements IAuthService {
     private final IUserService userService;
     private final ISessionService sessionService;
     private final PasswordEncoder passwordEncoder;
+    private final JwtService jwtService;
 
     @Transactional
     @Override
@@ -70,8 +72,9 @@ public class AuthService implements IAuthService {
     }
 
     @Override
-    public void logout(String refreshToken) {
-        sessionService.revokeSessionByRefreshToken(refreshToken);
+    public void logout(UUID sessionId) {
+
+        sessionService.revokeSessionBySessionId(sessionId);
 
     }
 
