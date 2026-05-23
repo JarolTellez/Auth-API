@@ -2,6 +2,8 @@ package com.jarol.auth.auth_api.service;
 
 import com.jarol.auth.auth_api.config.JwtProperties;
 import com.jarol.auth.auth_api.dto.response.AuthResponse;
+import com.jarol.auth.auth_api.exception.InvalidCredentialsException;
+import com.jarol.auth.auth_api.exception.InvalidTokenException;
 import com.jarol.auth.auth_api.mapper.IAuthMapper;
 import com.jarol.auth.auth_api.model.Session;
 import com.jarol.auth.auth_api.model.User;
@@ -22,7 +24,7 @@ import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
-public class SessionService implements ISessionService{
+public class SessionService implements ISessionService {
     private final JwtProperties jwtProperties;
     private final UserAgentParser userAgentParser;
     private final ISessionRepository sessionRepository;
@@ -60,15 +62,33 @@ public class SessionService implements ISessionService{
         return authMapper.userToAuthResponse(user, accessToken, refreshToken, expiresAt);
     }
 
-    private String hashRefreshToken(String refreshToken){
+    @Override
+    public void revokeSessionByRefreshToken(String refreshToken) {
+        Session session = getSessionByRefreshToken(refreshToken);
+        session.setRevoked(true);
+
+        sessionRepository.save(session);
+
+    }
+
+    @Override
+    public Session getSessionByRefreshToken(String refreshToken) {
+        String refreshTokenHash = hashRefreshToken(refreshToken);
+        return sessionRepository.findByRefreshTokenHash(refreshTokenHash).orElseThrow(() ->
+                new InvalidTokenException()
+        );
+    }
+
+
+    private String hashRefreshToken(String refreshToken) {
         try {
             MessageDigest digest = MessageDigest.getInstance("SHA-256");
-            byte[] hash= digest.digest(refreshToken.getBytes(StandardCharsets.UTF_8));
+            byte[] hash = digest.digest(refreshToken.getBytes(StandardCharsets.UTF_8));
 
             return HexFormat.of().formatHex(hash);
 
-        }catch (NoSuchAlgorithmException e){
-            throw  new RuntimeException("SHA-256 algorithm not available", e);
+        } catch (NoSuchAlgorithmException e) {
+            throw new RuntimeException("SHA-256 algorithm not available", e);
 
         }
     }

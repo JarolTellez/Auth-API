@@ -8,4 +8,6 @@ import com.jarol.auth.auth_api.model.valueObject.SessionMetadata;
 public interface ISessionService {
 
    AuthResponse createSessionAndTokens(User user, String userAgent, String ip);
+   void revokeSessionByRefreshToken(String refreshToken);
+   Session getSessionByRefreshToken(String refreshToken);
 }

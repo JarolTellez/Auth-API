@@ -69,6 +69,12 @@ public class AuthService implements IAuthService {
         return sessionService.createSessionAndTokens(user, userAgent, ip);
     }
 
+    @Override
+    public void logout(String refreshToken) {
+        sessionService.revokeSessionByRefreshToken(refreshToken);
+
+    }
+
 
     private String extractIp(HttpServletRequest httpRequest) {
         String ip = httpRequest.getHeader("X-Forwarded-For");

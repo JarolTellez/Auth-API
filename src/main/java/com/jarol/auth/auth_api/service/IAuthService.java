@@ -9,5 +9,6 @@ public interface IAuthService {
 
     AuthResponse register(RegisterRequest request, HttpServletRequest httpRequest);
     AuthResponse login(LoginRequest request,HttpServletRequest httpRequest);
+    void logout(String refreshToken);
 
 }
