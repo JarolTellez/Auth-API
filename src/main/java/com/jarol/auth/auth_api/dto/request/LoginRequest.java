@@ -15,7 +15,7 @@ import lombok.ToString;
 public class LoginRequest {
 
     @NotBlank(message = "Identifier is required")
-    @Size(max = 255)
+    @Size(min = 6, max = 25)
     private String identifier;
 
     @NotBlank(message = "Password is required")

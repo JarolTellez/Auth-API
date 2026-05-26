@@ -28,15 +28,21 @@ public class UserService implements IUserService {
 
     @Override
     public User createUser(RegisterRequest request) {
-        if (userRepository.existsByEmail(request.getEmail())) {
+
+        String normalizedEmail = normalizeIdentifier(request.getEmail());
+        String normalizedUsername = normalizeIdentifier(request.getUsername());
+        if (userRepository.existsByEmail(normalizedEmail)) {
             throw new EmailAlreadyExistsException(request.getEmail());
         }
 
-        if(userRepository.existsByUsername(request.getUsername())){
+        if (userRepository.existsByUsername(normalizedUsername)) {
             throw new UsernameAlreadyExistsException(request.getUsername());
         }
 
+
         User user = userMapper.registerRequestToUser(request);
+        user.setEmail(normalizedEmail);
+        user.setUsername(normalizedUsername);
 
         user.setPassword(passwordEncoder.encode(request.getPassword()));
 
@@ -52,10 +58,16 @@ public class UserService implements IUserService {
 
     @Override
     public User getUserByIdentifier(String identifier) {
+        String normalizedIdentifier=normalizeIdentifier(identifier);
         return userRepository
-                .findByEmailOrUsername(identifier, identifier)
+                .findByEmailOrUsername(normalizedIdentifier, normalizedIdentifier)
                 .orElseThrow(() ->
                         new UserNotFoundException(identifier)
                 );
     }
+
+    private String normalizeIdentifier(String identifier) {
+        return identifier.trim().toLowerCase();
+    }
+
 }
