@@ -5,6 +5,7 @@ import com.jarol.auth.auth_api.dto.request.LoginRequest;
 import com.jarol.auth.auth_api.dto.request.LogoutRequest;
 import com.jarol.auth.auth_api.dto.request.RegisterRequest;
 import com.jarol.auth.auth_api.dto.response.AuthResponse;
+import com.jarol.auth.auth_api.dto.response.RevokeAllSessionsResponse;
 import com.jarol.auth.auth_api.service.IAuthService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
@@ -40,5 +41,11 @@ public class AuthController {
 
         authService.logout(user.getSessionId());
         return ResponseEntity.ok("Logged out successfully");
+    }
+
+    @PostMapping("logoutAll")
+    public ResponseEntity<?> logoutAllSessions(@AuthenticationPrincipal CustomUserDetails user){
+        RevokeAllSessionsResponse response = authService.logoutAllSessions(user.getUserId());
+        return ResponseEntity.ok(response);
     }
 }

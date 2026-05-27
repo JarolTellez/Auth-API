@@ -4,6 +4,7 @@ import com.jarol.auth.auth_api.config.JwtProperties;
 import com.jarol.auth.auth_api.dto.request.LoginRequest;
 import com.jarol.auth.auth_api.dto.request.RegisterRequest;
 import com.jarol.auth.auth_api.dto.response.AuthResponse;
+import com.jarol.auth.auth_api.dto.response.RevokeAllSessionsResponse;
 import com.jarol.auth.auth_api.dto.response.UserResponse;
 import com.jarol.auth.auth_api.exception.InvalidCredentialsException;
 import com.jarol.auth.auth_api.mapper.IAuthMapper;
@@ -52,7 +53,7 @@ public class AuthService implements IAuthService {
 
         User user = userService.createUser(request);
 
-        return  sessionService.createSessionAndTokens(user, userAgent, ip);
+        return sessionService.createSessionAndTokens(user, userAgent, ip);
     }
 
     @Override
@@ -76,6 +77,13 @@ public class AuthService implements IAuthService {
 
         sessionService.revokeSessionBySessionId(sessionId);
 
+    }
+
+    @Override
+    public RevokeAllSessionsResponse logoutAllSessions(UUID userId) {
+        int revokedSessions = sessionService.revokeAllSessionsByUserId(userId);
+
+        return RevokeAllSessionsResponse.builder().revokedSessions(revokedSessions).build();
     }
 
 

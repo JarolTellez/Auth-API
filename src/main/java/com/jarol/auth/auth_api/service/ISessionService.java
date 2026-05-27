@@ -12,5 +12,7 @@ public interface ISessionService {
 
    AuthResponse createSessionAndTokens(User user, String userAgent, String ip);
    void revokeSessionBySessionId(UUID sessionId);
+   int revokeAllSessionsByUserId(UUID userId);
    Session getSessionBySessionId(UUID sessionId);
+
 }

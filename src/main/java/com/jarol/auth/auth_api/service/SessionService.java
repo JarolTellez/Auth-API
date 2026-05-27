@@ -75,6 +75,11 @@ public class SessionService implements ISessionService {
     }
 
     @Override
+    public int revokeAllSessionsByUserId(UUID userId) {
+        return sessionRepository.revokeAllSessionByUserId(userId, Instant.now());
+    }
+
+    @Override
     public Session getSessionBySessionId(UUID sessionId) {
         return sessionRepository.findById(sessionId).orElseThrow(() ->
                 new SessionNotFoundException()

@@ -47,7 +47,7 @@ public class JwtService {
                 .subject(user.getId().toString())
                 .claim("sessionId", sessionId.toString())
                 .claim("username", user.getUsername())
-                .claim("roles", user.getRoles().stream().map(role -> "ROLE_"+ role.getName().name()).toList())
+                .claim("roles", user.getRoles().stream().map(role -> "ROLE_" + role.getName().name()).toList())
                 .claim("type", type)
                 .issuedAt(new Date())
                 .expiration(new Date(System.currentTimeMillis() + expiration))
@@ -60,37 +60,27 @@ public class JwtService {
     }
 
     public UUID extractUserId(String token) {
-        return UUID.fromString(extractClaims(token).getSubject());
+        return UUID.fromString(parseAndValidateToken(token).getSubject());
     }
 
     public UUID extractSessionId(String token) {
-        return UUID.fromString(extractClaims(token).get("sessionId", String.class));
+        return UUID.fromString(parseAndValidateToken(token).get("sessionId", String.class));
     }
+
     public String extractEmail(String token) {
-        return extractClaims(token).get("email", String.class);
+        return parseAndValidateToken(token).get("email", String.class);
     }
 
     public String extractUsername(String token) {
-        return extractClaims(token).get("username", String.class);
+        return parseAndValidateToken(token).get("username", String.class);
     }
+
     public List<String> extractRoles(String token) {
-        return extractClaims(token).get("roles", List.class);
-    }
-
-    public boolean isTokenValid(String token) {
-        try {
-            Claims claims = extractClaims(token);
-
-            String type = claims.get("type", String.class);
-            return jwtProperties.getAccessType().equals(type) && claims.getExpiration().after(new Date());
-        } catch (Exception ex) {
-            return false;
-        }
-
+        return parseAndValidateToken(token).get("roles", List.class);
     }
 
 
-    private Claims extractClaims(String token) {
+    public Claims parseAndValidateToken(String token) {
         return Jwts.parser()
                 .verifyWith(getSignKey())
                 .build()
