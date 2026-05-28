@@ -13,6 +13,7 @@ public interface IAuthService {
     AuthResponse register(RegisterRequest request, HttpServletRequest httpRequest);
     AuthResponse login(LoginRequest request,HttpServletRequest httpRequest);
     void logout(UUID sessionId);
-    RevokeAllSessionsResponse logoutAllSessions(UUID userId);
+    RevokeAllSessionsResponse revokeAllSessions(UUID userId);
+    void revokeSession(UUID sessionId, UUID userId);
 
 }

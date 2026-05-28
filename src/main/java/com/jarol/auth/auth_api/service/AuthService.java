@@ -6,6 +6,7 @@ import com.jarol.auth.auth_api.dto.request.RegisterRequest;
 import com.jarol.auth.auth_api.dto.response.AuthResponse;
 import com.jarol.auth.auth_api.dto.response.RevokeAllSessionsResponse;
 import com.jarol.auth.auth_api.dto.response.UserResponse;
+import com.jarol.auth.auth_api.exception.AccessDeniedException;
 import com.jarol.auth.auth_api.exception.InvalidCredentialsException;
 import com.jarol.auth.auth_api.mapper.IAuthMapper;
 import com.jarol.auth.auth_api.mapper.IUserMapper;
@@ -74,16 +75,27 @@ public class AuthService implements IAuthService {
 
     @Override
     public void logout(UUID sessionId) {
-
-        sessionService.revokeSessionBySessionId(sessionId);
+        Session session = sessionService.getSessionBySessionId(sessionId);
+        sessionService.revokeSession(session);
 
     }
 
     @Override
-    public RevokeAllSessionsResponse logoutAllSessions(UUID userId) {
+    public RevokeAllSessionsResponse revokeAllSessions(UUID userId) {
         int revokedSessions = sessionService.revokeAllSessionsByUserId(userId);
 
         return RevokeAllSessionsResponse.builder().revokedSessions(revokedSessions).build();
+    }
+
+    @Override
+    public void revokeSession(UUID sessionId, UUID userId) {
+        Session session = sessionService.getSessionBySessionId(sessionId);
+
+        if (!session.getUser().getId().equals(userId)) {
+            throw new AccessDeniedException("You are not allowed to revoke this session");
+        }
+
+        sessionService.revokeSession(session);
     }
 
 

@@ -17,6 +17,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.UUID;
+
 @RestController
 @RequestMapping("/api/auth")
 @RequiredArgsConstructor
@@ -36,16 +38,21 @@ public class AuthController {
         return ResponseEntity.ok(response);
     }
 
-    @PostMapping("logout")
+    @PostMapping("/sessions/logout")
     public ResponseEntity<?> logout(@AuthenticationPrincipal CustomUserDetails user){
 
         authService.logout(user.getSessionId());
         return ResponseEntity.ok("Logged out successfully");
     }
 
-    @PostMapping("logoutAll")
-    public ResponseEntity<?> logoutAllSessions(@AuthenticationPrincipal CustomUserDetails user){
-        RevokeAllSessionsResponse response = authService.logoutAllSessions(user.getUserId());
+    @PostMapping("/sessions/revokeAll")
+    public ResponseEntity<RevokeAllSessionsResponse> revokeAllSessions(@AuthenticationPrincipal CustomUserDetails user){
+        RevokeAllSessionsResponse response = authService.revokeAllSessions(user.getUserId());
         return ResponseEntity.ok(response);
+    }
+
+    @PatchMapping("/session/{sessionId}/revoke")
+    public ResponseEntity<?> revokeSession(@PathVariable UUID sessionId, @AuthenticationPrincipal CustomUserDetails user){
+
     }
 }

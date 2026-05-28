@@ -64,8 +64,7 @@ public class SessionService implements ISessionService {
     }
 
     @Override
-    public void revokeSessionBySessionId(UUID sessionId) {
-        Session session = getSessionBySessionId(sessionId);
+    public void revokeSession(Session session) {
         if(session.isRevoked()){
             return;
         }

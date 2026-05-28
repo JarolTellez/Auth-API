@@ -11,7 +11,7 @@ import java.util.UUID;
 public interface ISessionService {
 
    AuthResponse createSessionAndTokens(User user, String userAgent, String ip);
-   void revokeSessionBySessionId(UUID sessionId);
+   void revokeSession(Session session);
    int revokeAllSessionsByUserId(UUID userId);
    Session getSessionBySessionId(UUID sessionId);
 

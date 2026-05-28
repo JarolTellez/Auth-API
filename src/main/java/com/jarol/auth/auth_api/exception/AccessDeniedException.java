@@ -4,9 +4,9 @@ import org.springframework.http.HttpStatus;
 
 public class AccessDeniedException extends BusinessException{
 
-    public AccessDeniedException(){
+    public AccessDeniedException(String message){
         super(
-                "Access denied",
+                "Access denied "+message,
                 ErrorCode.ACCESS_DENIED,
                 HttpStatus.FORBIDDEN
         );
