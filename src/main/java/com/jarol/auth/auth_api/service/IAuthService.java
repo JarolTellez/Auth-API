@@ -11,9 +11,9 @@ import java.util.UUID;
 public interface IAuthService {
 
     AuthResponse register(RegisterRequest request, HttpServletRequest httpRequest);
-    AuthResponse login(LoginRequest request,HttpServletRequest httpRequest);
-    void logout(UUID sessionId);
-    RevokeAllSessionsResponse revokeAllSessions(UUID userId);
-    void revokeSession(UUID sessionId, UUID userId);
+
+    AuthResponse login(LoginRequest request, HttpServletRequest httpRequest);
+
+    void logout(UUID sessionId, UUID userId);
 
 }

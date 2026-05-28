@@ -74,29 +74,12 @@ public class AuthService implements IAuthService {
     }
 
     @Override
-    public void logout(UUID sessionId) {
-        Session session = sessionService.getSessionBySessionId(sessionId);
-        sessionService.revokeSession(session);
+    public void logout(UUID sessionId, UUID userId) {
+
+        sessionService.revokeSession(sessionId, userId);
 
     }
 
-    @Override
-    public RevokeAllSessionsResponse revokeAllSessions(UUID userId) {
-        int revokedSessions = sessionService.revokeAllSessionsByUserId(userId);
-
-        return RevokeAllSessionsResponse.builder().revokedSessions(revokedSessions).build();
-    }
-
-    @Override
-    public void revokeSession(UUID sessionId, UUID userId) {
-        Session session = sessionService.getSessionBySessionId(sessionId);
-
-        if (!session.getUser().getId().equals(userId)) {
-            throw new AccessDeniedException("You are not allowed to revoke this session");
-        }
-
-        sessionService.revokeSession(session);
-    }
 
 
     private String extractIp(HttpServletRequest httpRequest) {

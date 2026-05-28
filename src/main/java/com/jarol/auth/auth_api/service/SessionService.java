@@ -2,6 +2,8 @@ package com.jarol.auth.auth_api.service;
 
 import com.jarol.auth.auth_api.config.JwtProperties;
 import com.jarol.auth.auth_api.dto.response.AuthResponse;
+import com.jarol.auth.auth_api.dto.response.RevokeAllSessionsResponse;
+import com.jarol.auth.auth_api.exception.AccessDeniedException;
 import com.jarol.auth.auth_api.exception.InvalidCredentialsException;
 import com.jarol.auth.auth_api.exception.InvalidTokenException;
 import com.jarol.auth.auth_api.exception.SessionNotFoundException;
@@ -63,20 +65,6 @@ public class SessionService implements ISessionService {
         return authMapper.userToAuthResponse(user, accessToken, refreshToken, expiresAt);
     }
 
-    @Override
-    public void revokeSession(Session session) {
-        if(session.isRevoked()){
-            return;
-        }
-        session.setRevoked(true);
-        session.setRevokedAt(Instant.now());
-        sessionRepository.save(session);
-    }
-
-    @Override
-    public int revokeAllSessionsByUserId(UUID userId) {
-        return sessionRepository.revokeAllSessionByUserId(userId, Instant.now());
-    }
 
     @Override
     public Session getSessionBySessionId(UUID sessionId) {
@@ -85,6 +73,28 @@ public class SessionService implements ISessionService {
         );
     }
 
+    @Override
+    public RevokeAllSessionsResponse revokeAllSessions(UUID userId) {
+        int revokedSessions = sessionRepository.revokeAllSessionByUserId(userId, Instant.now());
+        ;
+
+        return RevokeAllSessionsResponse.builder().revokedSessions(revokedSessions).build();
+    }
+
+    @Override
+    public void revokeSession(UUID sessionId, UUID userId) {
+        Session session = getSessionBySessionId(sessionId);
+
+        if (!session.getUser().getId().equals(userId)) {
+            throw new AccessDeniedException("You are not allowed to revoke this session");
+        }
+        if (session.isRevoked()) {
+            return;
+        }
+        session.setRevoked(true);
+        session.setRevokedAt(Instant.now());
+        sessionRepository.save(session);
+    }
 
     private String hashRefreshToken(String refreshToken) {
         try {
