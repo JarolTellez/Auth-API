@@ -5,8 +5,10 @@ import lombok.Data;
 
 import java.time.Instant;
 
-@Data
-public class RefreshTokenRequest {
-    @NotBlank
-    private Instant refreshToken;
+
+public record RefreshTokenRequest (
+        @NotBlank
+        String refreshToken
+) {
+
 }

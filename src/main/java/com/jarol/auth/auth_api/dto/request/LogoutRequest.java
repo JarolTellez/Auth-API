@@ -5,10 +5,10 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-@Data
-@AllArgsConstructor
-@NoArgsConstructor
-public class LogoutRequest {
-    @NotBlank(message="RefreshToken is required")
-    String refreshToken;
+
+public record LogoutRequest (
+        @NotBlank(message="RefreshToken is required")
+        String refreshToken
+) {
+
 }

@@ -61,10 +61,10 @@ public class AuthService implements IAuthService {
     public AuthResponse login(LoginRequest request, HttpServletRequest httpRequest) {
         String userAgent = httpRequest.getHeader("User-Agent");
         String ip = extractIp(httpRequest);
-        User user = userService.getUserByIdentifier(request.getIdentifier());
+        User user = userService.getUserByIdentifier(request.identifier());
 
         if (!passwordEncoder.matches(
-                request.getPassword(),
+                request.password(),
                 user.getPassword()
         )) {
             throw new InvalidCredentialsException();

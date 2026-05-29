@@ -29,14 +29,14 @@ public class UserService implements IUserService {
     @Override
     public User createUser(RegisterRequest request) {
 
-        String normalizedEmail = normalizeIdentifier(request.getEmail());
-        String normalizedUsername = normalizeIdentifier(request.getUsername());
+        String normalizedEmail = normalizeIdentifier(request.email());
+        String normalizedUsername = normalizeIdentifier(request.username());
         if (userRepository.existsByEmail(normalizedEmail)) {
-            throw new EmailAlreadyExistsException(request.getEmail());
+            throw new EmailAlreadyExistsException(request.email());
         }
 
         if (userRepository.existsByUsername(normalizedUsername)) {
-            throw new UsernameAlreadyExistsException(request.getUsername());
+            throw new UsernameAlreadyExistsException(request.username());
         }
 
 
@@ -44,7 +44,7 @@ public class UserService implements IUserService {
         user.setEmail(normalizedEmail);
         user.setUsername(normalizedUsername);
 
-        user.setPassword(passwordEncoder.encode(request.getPassword()));
+        user.setPassword(passwordEncoder.encode(request.password()));
 
         Role roleUser = roleRepository.findByName(EnumRole.USER)
                 .orElseThrow(() -> new RoleNotFoundException(EnumRole.USER));
