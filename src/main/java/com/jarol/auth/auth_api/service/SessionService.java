@@ -78,7 +78,7 @@ public class SessionService implements ISessionService {
         int revokedSessions = sessionRepository.revokeAllSessionByUserId(userId, Instant.now());
         ;
 
-        return RevokeAllSessionsResponse.builder().revokedSessions(revokedSessions).build();
+        return new RevokeAllSessionsResponse(revokedSessions);
     }
 
     @Override

@@ -6,11 +6,12 @@ import lombok.Data;
 import java.util.Set;
 import java.util.UUID;
 
-@Data
-@Builder
-public class UserResponse {
-    private UUID id;
-    private String username;
-    private String email;
-    private Set<String> roles;
+
+public record UserResponse (
+        UUID id,
+        String username,
+        String email,
+        Set<String> roles
+) {
+
 }

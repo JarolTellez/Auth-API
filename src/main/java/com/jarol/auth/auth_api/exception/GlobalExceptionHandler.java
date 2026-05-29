@@ -23,13 +23,14 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ApiError> handleBusinessException(BusinessException ex, HttpServletRequest request) {
         log.warn("Bussiness error: {}", ex.getMessage());
 
-        ApiError error = ApiError.builder()
-                .status(ex.getStatus().value())
-                .errorCode(ex.getErrorCode().name())
-                .message(ex.getMessage())
-                .timestamp(Instant.now())
-                .path(request.getRequestURI())
-                .build();
+        ApiError error = new ApiError(
+                ex.getStatus().value(),
+                ex.getErrorCode().name(),
+                ex.getMessage(),
+                Instant.now(),
+                request.getRequestURI(),
+                null
+        );
 
         return ResponseEntity.status(ex.getStatus()).body(error);
     }
@@ -38,13 +39,14 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ApiError> handleGenericException(Exception ex, HttpServletRequest request) {
         log.error("Unexpected error", ex);
 
-        ApiError error = ApiError.builder()
-                .status(HttpStatus.INTERNAL_SERVER_ERROR.value())
-                .errorCode(ErrorCode.INTERNAL_SERVER_ERROR.name())
-                .message("Unexpected internal server error")
-                .timestamp(Instant.now())
-                .path(request.getRequestURI())
-                .build();
+        ApiError error = new ApiError(
+                HttpStatus.INTERNAL_SERVER_ERROR.value(),
+                ErrorCode.INTERNAL_SERVER_ERROR.name(),
+                "Unexpected internal server error",
+                Instant.now(),
+                request.getRequestURI(),
+                null
+        );
 
         return ResponseEntity.internalServerError().body(error);
     }
@@ -59,18 +61,18 @@ public class GlobalExceptionHandler {
                     fieldError.getDefaultMessage()
             );
         }
-            log.warn("Validation error: {}", errors);
+        log.warn("Validation error: {}", errors);
 
-            ApiError error = ApiError.builder()
-                    .status(HttpStatus.BAD_REQUEST.value())
-                    .errorCode(ErrorCode.VALIDATION_ERROR.name())
-                    .message("Validation failed")
-                    .details(errors)
-                    .timestamp(Instant.now())
-                    .path(request.getRequestURI())
-                    .build();
+        ApiError error = new ApiError(
+                HttpStatus.BAD_REQUEST.value(),
+                ErrorCode.VALIDATION_ERROR.name(),
+                "Validation failed",
+                Instant.now(),
+                request.getRequestURI(),
+                errors
+        );
 
-            return ResponseEntity.badRequest().body(error);
+        return ResponseEntity.badRequest().body(error);
 
 
     }
@@ -82,7 +84,7 @@ public class GlobalExceptionHandler {
 
         Map<String, String> errors = new HashMap<>();
 
-        ex.getConstraintViolations().forEach(violation->{
+        ex.getConstraintViolations().forEach(violation -> {
             errors.put(
                     violation.getPropertyPath().toString(),
                     violation.getMessage()
@@ -90,14 +92,14 @@ public class GlobalExceptionHandler {
         });
         log.warn("Constraint violation: {}", ex.getMessage());
 
-        ApiError error = ApiError.builder()
-                .status(HttpStatus.BAD_REQUEST.value())
-                .errorCode(ErrorCode.INVALID_PARAMETERS.name())
-                .message("Invalid request parameters")
-                .details(errors)
-                .timestamp(Instant.now())
-                .path(request.getRequestURI())
-                .build();
+        ApiError error = new ApiError(
+                HttpStatus.BAD_REQUEST.value(),
+                ErrorCode.INVALID_PARAMETERS.name(),
+                "Invalid request parameters",
+                Instant.now(),
+                request.getRequestURI(),
+                errors
+        );
 
         return ResponseEntity
                 .badRequest()

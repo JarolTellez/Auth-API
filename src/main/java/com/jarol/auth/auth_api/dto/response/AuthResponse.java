@@ -7,13 +7,27 @@ import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
-@Data
-@Builder
-public class AuthResponse {
 
-    private String accessToken;
-    private String refreshToken;
-    private String tokenType = "Bearer";
-    private Instant refreshTokenExpiresAt;
-    private UserResponse user;
+public record AuthResponse(
+        String accessToken,
+        String refreshToken,
+        String tokenType,
+        Instant refreshTokenExpiresAt,
+        UserResponse user
+) {
+
+    public AuthResponse(
+            String accessToken,
+            String refreshToken,
+            Instant refreshTokenExpiresAt,
+            UserResponse user
+    ) {
+        this(
+                accessToken,
+                refreshToken,
+                "Bearer",
+                refreshTokenExpiresAt,
+                user
+        );
+    }
 }

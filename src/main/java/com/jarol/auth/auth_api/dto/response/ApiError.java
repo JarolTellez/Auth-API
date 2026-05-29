@@ -5,14 +5,14 @@ import lombok.Getter;
 
 import java.time.Instant;
 
-@Getter
-@Builder
-public class ApiError {
 
-    private  int status;
-    private String errorCode;
-    private String message;
-    private Instant timestamp;
-    private String path;
-    private Object details;
+public record ApiError(
+        int status,
+        String errorCode,
+        String message,
+        Instant timestamp,
+        String path,
+        Object details
+) {
+
 }
