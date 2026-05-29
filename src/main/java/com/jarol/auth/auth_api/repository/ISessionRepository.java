@@ -7,6 +7,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -27,5 +28,7 @@ public interface ISessionRepository extends JpaRepository<Session, UUID> {
                     """
     )
     int revokeAllSessionByUserId(UUID userId, Instant revokedAt);
+
+    List<Session> findByUserIdAndRevokedFalse(UUID userId);
 
 }

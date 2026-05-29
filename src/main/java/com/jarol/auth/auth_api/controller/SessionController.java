@@ -2,12 +2,16 @@ package com.jarol.auth.auth_api.controller;
 
 import com.jarol.auth.auth_api.config.CustomUserDetails;
 import com.jarol.auth.auth_api.dto.response.RevokeAllSessionsResponse;
+import com.jarol.auth.auth_api.dto.response.SessionResponse;
+import com.jarol.auth.auth_api.dto.response.SessionsResponse;
 import com.jarol.auth.auth_api.service.SessionService;
 import lombok.RequiredArgsConstructor;
+import org.apache.coyote.Response;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.UUID;
 
 @RestController
@@ -27,6 +31,16 @@ public class SessionController {
 
         sessionService.revokeSession(sessionId, user.getUserId());
         return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/sessions")
+    public ResponseEntity<SessionsResponse> listActiveSessions(@AuthenticationPrincipal CustomUserDetails user){
+
+        SessionsResponse sessions = sessionService.getActiveSessions(user.getUserId(), user.getSessionId());
+        if(sessions.sessions().isEmpty()){
+            return ResponseEntity.noContent().build();
+        }
+        return ResponseEntity.ok(sessions);
     }
 
 

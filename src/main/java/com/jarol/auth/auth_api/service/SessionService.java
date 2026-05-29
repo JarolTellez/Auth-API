@@ -3,11 +3,14 @@ package com.jarol.auth.auth_api.service;
 import com.jarol.auth.auth_api.config.JwtProperties;
 import com.jarol.auth.auth_api.dto.response.AuthResponse;
 import com.jarol.auth.auth_api.dto.response.RevokeAllSessionsResponse;
+import com.jarol.auth.auth_api.dto.response.SessionResponse;
+import com.jarol.auth.auth_api.dto.response.SessionsResponse;
 import com.jarol.auth.auth_api.exception.AccessDeniedException;
 import com.jarol.auth.auth_api.exception.InvalidCredentialsException;
 import com.jarol.auth.auth_api.exception.InvalidTokenException;
 import com.jarol.auth.auth_api.exception.SessionNotFoundException;
 import com.jarol.auth.auth_api.mapper.IAuthMapper;
+import com.jarol.auth.auth_api.mapper.ISessionMapper;
 import com.jarol.auth.auth_api.model.Session;
 import com.jarol.auth.auth_api.model.User;
 import com.jarol.auth.auth_api.model.valueObject.SessionMetadata;
@@ -23,6 +26,7 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.time.Instant;
 import java.util.HexFormat;
+import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -33,6 +37,7 @@ public class SessionService implements ISessionService {
     private final ISessionRepository sessionRepository;
     private final JwtService jwtService;
     private final IAuthMapper authMapper;
+    private final ISessionMapper iSessionMapper;
 
     @Override
     public AuthResponse createSessionAndTokens(User user, String userAgent, String ip) {
@@ -71,6 +76,16 @@ public class SessionService implements ISessionService {
         return sessionRepository.findById(sessionId).orElseThrow(() ->
                 new SessionNotFoundException()
         );
+    }
+
+    @Override
+    public SessionsResponse getActiveSessions(UUID userId, UUID currentSessionId) {
+        List<Session> sessions =sessionRepository.findByUserIdAndRevokedFalse(userId);
+        List<SessionResponse> responseSessions=iSessionMapper.sessionsToSessionsResponse(sessions, currentSessionId);
+
+        return new SessionsResponse(responseSessions,responseSessions.size());
+
+
     }
 
     @Override

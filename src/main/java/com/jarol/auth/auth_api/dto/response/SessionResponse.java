@@ -13,5 +13,6 @@ public record SessionResponse(
         OS os,
         Browser browser,
         Instant createdAt,
-        Instant expiresAt
+        Instant expiresAt,
+        Boolean current
 ){}
