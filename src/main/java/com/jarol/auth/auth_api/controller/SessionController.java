@@ -28,4 +28,6 @@ public class SessionController {
         sessionService.revokeSession(sessionId, user.getUserId());
         return ResponseEntity.noContent().build();
     }
+
+    public ResponseEntity<>
 }
