@@ -11,6 +11,7 @@ public record UserResponse (
         UUID id,
         String username,
         String email,
+        boolean enabled,
         Set<String> roles
 ) {
 

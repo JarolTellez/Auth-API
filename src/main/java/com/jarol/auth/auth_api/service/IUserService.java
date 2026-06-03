@@ -11,4 +11,6 @@ public interface IUserService {
 User createUser(RegisterRequest request);
 
 User getUserByIdentifier(String identifier);
+
+UserResponse updateUserStatus(UUID userId, boolean enabled);
 }

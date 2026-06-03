@@ -1,6 +1,7 @@
 package com.jarol.auth.auth_api.service;
 
 import com.jarol.auth.auth_api.dto.request.RegisterRequest;
+import com.jarol.auth.auth_api.dto.response.UserResponse;
 import com.jarol.auth.auth_api.exception.EmailAlreadyExistsException;
 import com.jarol.auth.auth_api.exception.RoleNotFoundException;
 import com.jarol.auth.auth_api.exception.UserNotFoundException;
@@ -14,8 +15,12 @@ import com.jarol.auth.auth_api.repository.IUserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import tools.jackson.databind.ser.impl.UnknownSerializer;
 
+import java.util.Optional;
+import java.util.OptionalInt;
 import java.util.Set;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -58,7 +63,7 @@ public class UserService implements IUserService {
 
     @Override
     public User getUserByIdentifier(String identifier) {
-        String normalizedIdentifier=normalizeIdentifier(identifier);
+        String normalizedIdentifier = normalizeIdentifier(identifier);
         return userRepository
                 .findByEmailOrUsername(normalizedIdentifier, normalizedIdentifier)
                 .orElseThrow(() ->
@@ -66,8 +71,27 @@ public class UserService implements IUserService {
                 );
     }
 
+    @Override
+    public UserResponse updateUserStatus(UUID userId, boolean enabled) {
+        User user = findUser(userId);
+
+        if (user.isEnabled() == enabled) {
+            return userMapper.userToUserResponse(user);
+        }
+
+        user.setEnabled(enabled);
+
+        userRepository.save(user);
+
+        return userMapper.userToUserResponse(user);
+
+    }
+
     private String normalizeIdentifier(String identifier) {
         return identifier.trim().toLowerCase();
     }
 
+    private User findUser(UUID userId) {
+        return userRepository.findById(userId).orElseThrow(() -> new UserNotFoundException(userId.toString()));
+    }
 }
