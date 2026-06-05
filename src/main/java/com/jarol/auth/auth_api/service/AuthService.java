@@ -70,6 +70,10 @@ public class AuthService implements IAuthService {
             throw new InvalidCredentialsException();
         }
 
+        if(!user.isEnabled()){
+            throw  new AccessDeniedException("user "+user.getUsername()+" is disabled");
+        }
+
         return sessionService.createSessionAndTokens(user, userAgent, ip);
     }
 
