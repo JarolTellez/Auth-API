@@ -1,13 +1,10 @@
 package com.jarol.auth.auth_api.service;
 
 import com.jarol.auth.auth_api.dto.request.RegisterRequest;
-import com.jarol.auth.auth_api.dto.request.UpdateUserRolesRequest;
+import com.jarol.auth.auth_api.dto.request.AdminUpdateUserRequest;
 import com.jarol.auth.auth_api.dto.response.AdminUserResponse;
 import com.jarol.auth.auth_api.dto.response.UserResponse;
-import com.jarol.auth.auth_api.exception.EmailAlreadyExistsException;
-import com.jarol.auth.auth_api.exception.RoleNotFoundException;
-import com.jarol.auth.auth_api.exception.UserNotFoundException;
-import com.jarol.auth.auth_api.exception.UsernameAlreadyExistsException;
+import com.jarol.auth.auth_api.exception.*;
 import com.jarol.auth.auth_api.mapper.IUserMapper;
 import com.jarol.auth.auth_api.model.Role;
 import com.jarol.auth.auth_api.model.User;
@@ -17,10 +14,8 @@ import com.jarol.auth.auth_api.repository.IUserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import tools.jackson.databind.ser.impl.UnknownSerializer;
 
-import java.util.Optional;
-import java.util.OptionalInt;
+import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
 
@@ -90,11 +85,24 @@ public class UserService implements IUserService {
     }
 
     @Override
-    public AdminUserResponse updateUserRoles(UUID userId, UpdateUserRolesRequest request) {
+    public AdminUserResponse updateUser(UUID userId, AdminUpdateUserRequest request) {
         User user = findUser(userId);
 
+        Set<Role> roles = new HashSet<>(
+                roleRepository.findAllById(request.roleIds())
+        );
 
 
+        if(request.roleIds().size() != roles.size()){
+            throw new TokenExpiredException();
+        }
+
+        user.setRoles(roles);
+        user.setUsername(request.username());
+        user.setEmail(request.email());
+        User userResponse=userRepository.save(user);
+
+        return userMapper.userToAdminUserResponse(user);
     }
 
     private String normalizeIdentifier(String identifier) {

@@ -1,6 +1,6 @@
 package com.jarol.auth.auth_api.controller;
 
-import com.jarol.auth.auth_api.dto.request.UpdateUserRolesRequest;
+import com.jarol.auth.auth_api.dto.request.AdminUpdateUserRequest;
 import com.jarol.auth.auth_api.dto.request.UpdateUserStatusRequest;
 import com.jarol.auth.auth_api.dto.response.AdminUserResponse;
 import com.jarol.auth.auth_api.dto.response.UserResponse;
@@ -27,9 +27,12 @@ public class AdminUserController {
         return ResponseEntity.ok(response);
     }
 
-    @PutMapping("/{userid}/roles")
-    public ResponseEntity<AdminUserResponse> updateRoles(@PathVariable UUID userId, @RequestBody UpdateUserRolesRequest request) {
+    @PutMapping("/{userId}/update")
+    public ResponseEntity<AdminUserResponse> updateUser(@PathVariable UUID userId, @RequestBody AdminUpdateUserRequest request) {
 
+        AdminUserResponse response= userService.updateUser(userId,request);
+
+        return ResponseEntity.ok(response);
     }
 
 }

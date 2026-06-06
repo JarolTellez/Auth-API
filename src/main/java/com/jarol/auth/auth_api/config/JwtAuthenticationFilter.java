@@ -53,6 +53,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             UUID sessionId = UUID.fromString(claims.get("sessionId", String.class));
             String username = claims.get("username", String.class);
             List<String> roles = claims.get("roles", List.class);
+            System.out.println(roles);
 
             List<GrantedAuthority> authorities = roles.stream().map(SimpleGrantedAuthority::new).collect(java.util.stream.Collectors.toList());
 

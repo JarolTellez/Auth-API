@@ -1,6 +1,7 @@
 package com.jarol.auth.auth_api.mapper;
 
 import com.jarol.auth.auth_api.dto.request.RegisterRequest;
+import com.jarol.auth.auth_api.dto.response.AdminUserResponse;
 import com.jarol.auth.auth_api.dto.response.AuthResponse;
 import com.jarol.auth.auth_api.dto.response.UserResponse;
 import com.jarol.auth.auth_api.model.Role;
@@ -18,7 +19,11 @@ import java.util.stream.Collectors;
  * Uses MapStruct to automatically generate mapping implementations.
  * Handles conversion for registration requests and user responses.
  */
-@Mapper(componentModel = "spring")
+@Mapper(
+        componentModel = "spring",
+        uses = IRoleMapper.class
+
+)
 public interface IUserMapper {
 
 
@@ -40,6 +45,8 @@ public interface IUserMapper {
 
     @Mapping(target = "roles", expression = "java(mapRoles(user.getRoles()))")
     UserResponse userToUserResponse(User user);
+
+    AdminUserResponse userToAdminUserResponse(User user);
 
     default Set<String> mapRoles(Set<Role> roles) {
         if (roles == null) return null;
