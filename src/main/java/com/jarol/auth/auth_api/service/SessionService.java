@@ -6,8 +6,6 @@ import com.jarol.auth.auth_api.dto.response.RevokeAllSessionsResponse;
 import com.jarol.auth.auth_api.dto.response.SessionResponse;
 import com.jarol.auth.auth_api.dto.response.SessionsResponse;
 import com.jarol.auth.auth_api.exception.AccessDeniedException;
-import com.jarol.auth.auth_api.exception.InvalidCredentialsException;
-import com.jarol.auth.auth_api.exception.InvalidTokenException;
 import com.jarol.auth.auth_api.exception.SessionNotFoundException;
 import com.jarol.auth.auth_api.mapper.IAuthMapper;
 import com.jarol.auth.auth_api.mapper.ISessionMapper;
@@ -16,16 +14,9 @@ import com.jarol.auth.auth_api.model.User;
 import com.jarol.auth.auth_api.model.valueObject.SessionMetadata;
 import com.jarol.auth.auth_api.repository.ISessionRepository;
 import com.jarol.auth.auth_api.service.parser.UserAgentParser;
-import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-
-import java.nio.charset.StandardCharsets;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.time.Instant;
-import java.util.HexFormat;
 import java.util.List;
 import java.util.UUID;
 
@@ -50,7 +41,7 @@ public class SessionService implements ISessionService {
         String accessToken = jwtService.generateAccessToken(user, sessionId);
         String refreshToken = jwtService.generateRefreshToken(user, sessionId);
 
-        String hash = hashRefreshToken(refreshToken);
+        String hash = jwtService.hashRefreshToken(refreshToken);
 
         Session session = Session.builder()
                 .id(sessionId)
@@ -65,17 +56,22 @@ public class SessionService implements ISessionService {
                 .revoked(false)
                 .build();
 
-        sessionRepository.save(session);
+        save(session);
 
-        return authMapper.userToAuthResponse(user, accessToken, refreshToken, expiresAt);
+        return authMapper.userToAuthResponse(user, accessToken, refreshToken, jwtProperties.getRefreshExpiration());
     }
 
 
     @Override
-    public Session getSessionBySessionId(UUID sessionId) {
+    public Session getSessionById(UUID sessionId) {
         return sessionRepository.findById(sessionId).orElseThrow(() ->
                 new SessionNotFoundException()
         );
+    }
+
+    @Override
+    public Session save(Session session) {
+       return sessionRepository.save(session);
     }
 
     @Override
@@ -98,7 +94,7 @@ public class SessionService implements ISessionService {
 
     @Override
     public void revokeSession(UUID sessionId, UUID userId) {
-        Session session = getSessionBySessionId(sessionId);
+        Session session = getSessionById(sessionId);
 
         if (!session.getUser().getId().equals(userId)) {
             throw new AccessDeniedException("You are not allowed to revoke this session");
@@ -111,16 +107,5 @@ public class SessionService implements ISessionService {
         sessionRepository.save(session);
     }
 
-    private String hashRefreshToken(String refreshToken) {
-        try {
-            MessageDigest digest = MessageDigest.getInstance("SHA-256");
-            byte[] hash = digest.digest(refreshToken.getBytes(StandardCharsets.UTF_8));
 
-            return HexFormat.of().formatHex(hash);
-
-        } catch (NoSuchAlgorithmException e) {
-            throw new RuntimeException("SHA-256 algorithm not available", e);
-
-        }
-    }
 }

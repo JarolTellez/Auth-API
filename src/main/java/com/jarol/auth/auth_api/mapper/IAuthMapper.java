@@ -34,5 +34,5 @@ public interface IAuthMapper {
     @Mapping(target = "refreshToken", source = "refreshToken")
     @Mapping(target = "refreshTokenExpiresAt", source = "refreshTokenExpiresAt")
     @Mapping(target = "tokenType", constant = "Bearer")
-    AuthResponse userToAuthResponse(User user, String accessToken, String refreshToken, Instant refreshTokenExpiresAt);
+    AuthResponse userToAuthResponse(User user, String accessToken, String refreshToken, Long refreshTokenExpiresAt);
 }

@@ -55,6 +55,19 @@ public class JwtService {
                 .compact();
     }
 
+    public String hashRefreshToken(String refreshToken) {
+        try {
+            MessageDigest digest = MessageDigest.getInstance("SHA-256");
+            byte[] hash = digest.digest(refreshToken.getBytes(StandardCharsets.UTF_8));
+
+            return HexFormat.of().formatHex(hash);
+
+        } catch (NoSuchAlgorithmException e) {
+            throw new RuntimeException("SHA-256 algorithm not available", e);
+
+        }
+    }
+
     private SecretKey getSignKey() {
         return key;
     }
@@ -65,10 +78,6 @@ public class JwtService {
 
     public UUID extractSessionId(String token) {
         return UUID.fromString(parseAndValidateToken(token).get("sessionId", String.class));
-    }
-
-    public String extractEmail(String token) {
-        return parseAndValidateToken(token).get("email", String.class);
     }
 
     public String extractUsername(String token) {

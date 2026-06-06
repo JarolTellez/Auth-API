@@ -12,14 +12,14 @@ public record AuthResponse(
         String accessToken,
         String refreshToken,
         String tokenType,
-        Instant refreshTokenExpiresAt,
+        Long refreshTokenExpiresAt,
         UserResponse user
 ) {
 
     public AuthResponse(
             String accessToken,
             String refreshToken,
-            Instant refreshTokenExpiresAt,
+            Long refreshTokenExpiresAt,
             UserResponse user
     ) {
         this(

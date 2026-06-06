@@ -4,6 +4,7 @@ import com.jarol.auth.auth_api.dto.request.LoginRequest;
 import com.jarol.auth.auth_api.dto.request.RegisterRequest;
 import com.jarol.auth.auth_api.dto.response.AuthResponse;
 import com.jarol.auth.auth_api.dto.response.RevokeAllSessionsResponse;
+import com.jarol.auth.auth_api.dto.response.TokenRefreshResponse;
 import jakarta.servlet.http.HttpServletRequest;
 
 import java.util.UUID;
@@ -15,5 +16,7 @@ public interface IAuthService {
     AuthResponse login(LoginRequest request, HttpServletRequest httpRequest);
 
     void logout(UUID sessionId, UUID userId);
+
+    TokenRefreshResponse refreshToken(String refreshToken);
 
 }

@@ -18,7 +18,9 @@ public interface ISessionService {
 
     void revokeSession(UUID sessionId, UUID userId);
 
-    Session getSessionBySessionId(UUID sessionId);
+    Session getSessionById(UUID sessionId);
+
+    Session save(Session session);
 
     SessionsResponse getActiveSessions(UUID userId, UUID currentSessionId);
 

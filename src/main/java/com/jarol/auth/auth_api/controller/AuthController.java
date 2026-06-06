@@ -3,8 +3,9 @@ package com.jarol.auth.auth_api.controller;
 import com.jarol.auth.auth_api.config.CustomUserDetails;
 import com.jarol.auth.auth_api.dto.request.LoginRequest;
 import com.jarol.auth.auth_api.dto.request.RegisterRequest;
+import com.jarol.auth.auth_api.dto.request.TokenRefreshRequest;
 import com.jarol.auth.auth_api.dto.response.AuthResponse;
-import com.jarol.auth.auth_api.dto.response.RevokeAllSessionsResponse;
+import com.jarol.auth.auth_api.dto.response.TokenRefreshResponse;
 import com.jarol.auth.auth_api.service.IAuthService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
@@ -41,5 +42,15 @@ public class AuthController {
         authService.logout(user.getSessionId(), user.getUserId());
         return ResponseEntity.noContent().build();
     }
+
+    @PostMapping("/refresh")
+    public ResponseEntity<TokenRefreshResponse> refreshToken(@RequestBody TokenRefreshRequest request){
+
+        TokenRefreshResponse response = authService.refreshToken(request.refreshToken());
+
+        return ResponseEntity.ok().body(response);
+    }
+
+
 
 }

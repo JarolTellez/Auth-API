@@ -5,9 +5,12 @@ import com.jarol.auth.auth_api.dto.request.LoginRequest;
 import com.jarol.auth.auth_api.dto.request.RegisterRequest;
 import com.jarol.auth.auth_api.dto.response.AuthResponse;
 import com.jarol.auth.auth_api.dto.response.RevokeAllSessionsResponse;
+import com.jarol.auth.auth_api.dto.response.TokenRefreshResponse;
 import com.jarol.auth.auth_api.dto.response.UserResponse;
 import com.jarol.auth.auth_api.exception.AccessDeniedException;
 import com.jarol.auth.auth_api.exception.InvalidCredentialsException;
+import com.jarol.auth.auth_api.exception.InvalidTokenException;
+import com.jarol.auth.auth_api.exception.TokenExpiredException;
 import com.jarol.auth.auth_api.mapper.IAuthMapper;
 import com.jarol.auth.auth_api.mapper.IUserMapper;
 import com.jarol.auth.auth_api.model.Role;
@@ -19,6 +22,7 @@ import com.jarol.auth.auth_api.repository.IRoleRepository;
 import com.jarol.auth.auth_api.repository.ISessionRepository;
 import com.jarol.auth.auth_api.repository.IUserRepository;
 import com.jarol.auth.auth_api.service.parser.UserAgentParser;
+import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwt;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
@@ -44,6 +48,7 @@ public class AuthService implements IAuthService {
     private final ISessionService sessionService;
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
+    private final JwtProperties jwtProperties;
 
     @Transactional
     @Override
@@ -70,8 +75,8 @@ public class AuthService implements IAuthService {
             throw new InvalidCredentialsException();
         }
 
-        if(!user.isEnabled()){
-            throw  new AccessDeniedException("user "+user.getUsername()+" is disabled");
+        if (!user.isEnabled()) {
+            throw new AccessDeniedException("user " + user.getUsername() + " is disabled");
         }
 
         return sessionService.createSessionAndTokens(user, userAgent, ip);
@@ -84,6 +89,48 @@ public class AuthService implements IAuthService {
 
     }
 
+    @Override
+    public TokenRefreshResponse refreshToken(String refreshToken) {
+
+        Claims claims = jwtService.parseAndValidateToken(refreshToken);
+        UUID sessionId = UUID.fromString(claims.get("sessionId", String.class));
+        String tokenType = claims.get("type", String.class);
+        String incomingHash = jwtService.hashRefreshToken(refreshToken);
+        Instant now = Instant.now();
+
+        if (!jwtProperties.getRefreshType().equals(tokenType)) {
+            throw new InvalidTokenException();
+        }
+
+        Session session = sessionService.getSessionById(sessionId);
+
+        if (!incomingHash.equals(session.getRefreshTokenHash())) {
+            throw new InvalidTokenException();
+        }
+
+        if (session.isRevoked()) {
+            throw new AccessDeniedException("Session was revoked");
+        }
+
+        if (session.getExpiresAt().isBefore(now)) {
+            throw new TokenExpiredException();
+        }
+
+
+        User user = session.getUser();
+
+
+        if (!user.isEnabled()) {
+            throw new AccessDeniedException(user.getUsername() + " is disabled");
+        }
+        String accessToken = jwtService.generateAccessToken(user, session.getId());
+
+        session.setLastUsedAt(now);
+        sessionService.save(session);
+
+
+        return new TokenRefreshResponse(accessToken, jwtProperties.getAccessExpiration());
+    }
 
 
     private String extractIp(HttpServletRequest httpRequest) {
