@@ -6,6 +6,7 @@ import jakarta.validation.ConstraintViolationException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -49,6 +50,22 @@ public class GlobalExceptionHandler {
         );
 
         return ResponseEntity.internalServerError().body(error);
+    }
+
+    @ExceptionHandler(HttpMessageNotReadableException.class)
+    public ResponseEntity<ApiError> handleHttpMessageNotReadable(HttpMessageNotReadableException ex, HttpServletRequest request){
+        log.warn("Malformed request body: {}", ex.getMessage());
+
+        ApiError error=new ApiError(
+                HttpStatus.BAD_REQUEST.value(),
+                ErrorCode.VALIDATION_ERROR.name(),
+                "Request body is required or malformed",
+                Instant.now(),
+                request.getRequestURI(),
+                null
+        );
+
+        return ResponseEntity.badRequest().body(error);
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)

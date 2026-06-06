@@ -44,7 +44,7 @@ public class AuthController {
     }
 
     @PostMapping("/refresh")
-    public ResponseEntity<TokenRefreshResponse> refreshToken(@RequestBody TokenRefreshRequest request){
+    public ResponseEntity<TokenRefreshResponse> refreshToken(@Valid @RequestBody TokenRefreshRequest request){
 
         TokenRefreshResponse response = authService.refreshToken(request.refreshToken());
 
