@@ -1,6 +1,8 @@
 package com.jarol.auth.auth_api.service;
 
 import com.jarol.auth.auth_api.dto.request.RegisterRequest;
+import com.jarol.auth.auth_api.dto.request.UpdateUserRolesRequest;
+import com.jarol.auth.auth_api.dto.response.AdminUserResponse;
 import com.jarol.auth.auth_api.dto.response.UserResponse;
 import com.jarol.auth.auth_api.exception.EmailAlreadyExistsException;
 import com.jarol.auth.auth_api.exception.RoleNotFoundException;
@@ -87,6 +89,14 @@ public class UserService implements IUserService {
 
     }
 
+    @Override
+    public AdminUserResponse updateUserRoles(UUID userId, UpdateUserRolesRequest request) {
+        User user = findUser(userId);
+
+
+
+    }
+
     private String normalizeIdentifier(String identifier) {
         return identifier.trim().toLowerCase();
     }
@@ -94,4 +104,6 @@ public class UserService implements IUserService {
     private User findUser(UUID userId) {
         return userRepository.findById(userId).orElseThrow(() -> new UserNotFoundException(userId.toString()));
     }
+
+
 }
