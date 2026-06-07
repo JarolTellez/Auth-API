@@ -12,4 +12,12 @@ public class RoleNotFoundException extends BusinessException {
                 HttpStatus.NOT_FOUND
         );
     }
+
+    public RoleNotFoundException() {
+        super(
+                "Role not found",
+                ErrorCode.ROLE_NOT_FOUND,
+                HttpStatus.NOT_FOUND
+        );
+    }
 }

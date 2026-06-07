@@ -7,10 +7,7 @@ import com.jarol.auth.auth_api.dto.response.AuthResponse;
 import com.jarol.auth.auth_api.dto.response.RevokeAllSessionsResponse;
 import com.jarol.auth.auth_api.dto.response.TokenRefreshResponse;
 import com.jarol.auth.auth_api.dto.response.UserResponse;
-import com.jarol.auth.auth_api.exception.AccessDeniedException;
-import com.jarol.auth.auth_api.exception.InvalidCredentialsException;
-import com.jarol.auth.auth_api.exception.InvalidTokenException;
-import com.jarol.auth.auth_api.exception.TokenExpiredException;
+import com.jarol.auth.auth_api.exception.*;
 import com.jarol.auth.auth_api.mapper.IAuthMapper;
 import com.jarol.auth.auth_api.mapper.IUserMapper;
 import com.jarol.auth.auth_api.model.Role;
@@ -76,7 +73,7 @@ public class AuthService implements IAuthService {
         }
 
         if (!user.isEnabled()) {
-            throw new AccessDeniedException("user " + user.getUsername() + " is disabled");
+            throw new UserDisabledException();
         }
 
         return sessionService.createSessionAndTokens(user, userAgent, ip);
@@ -121,7 +118,7 @@ public class AuthService implements IAuthService {
 
 
         if (!user.isEnabled()) {
-            throw new AccessDeniedException(user.getUsername() + " is disabled");
+            throw new UserDisabledException(user.getUsername());
         }
         String accessToken = jwtService.generateAccessToken(user, session.getId());
 

@@ -27,20 +27,13 @@ public class UserService implements IUserService {
     private final PasswordEncoder passwordEncoder;
     private final IUserMapper userMapper;
     private final IRoleRepository roleRepository;
+    private final ISessionService sessionService;
 
     @Override
     public User createUser(RegisterRequest request) {
 
-        String normalizedEmail = normalizeIdentifier(request.email());
-        String normalizedUsername = normalizeIdentifier(request.username());
-        if (userRepository.existsByEmail(normalizedEmail)) {
-            throw new EmailAlreadyExistsException(request.email());
-        }
-
-        if (userRepository.existsByUsername(normalizedUsername)) {
-            throw new UsernameAlreadyExistsException(request.username());
-        }
-
+        String normalizedEmail = validateUniqueEmail(request.email());
+        String normalizedUsername = validateUniqueUsername(request.username());
 
         User user = userMapper.registerRequestToUser(request);
         user.setEmail(normalizedEmail);
@@ -92,17 +85,21 @@ public class UserService implements IUserService {
                 roleRepository.findAllById(request.roleIds())
         );
 
+        String normalizedEmail = validateUniqueEmail(request.email());
+        String normalizedUsername = validateUniqueUsername(request.username());
+
 
         if(request.roleIds().size() != roles.size()){
-            throw new TokenExpiredException();
+            throw new RoleNotFoundException();
         }
 
         user.setRoles(roles);
-        user.setUsername(request.username());
-        user.setEmail(request.email());
+        user.setUsername(normalizedUsername);
+        user.setEmail(normalizedEmail);
         User userResponse=userRepository.save(user);
+        sessionService.revokeAllSessions(userId);
 
-        return userMapper.userToAdminUserResponse(user);
+        return userMapper.userToAdminUserResponse(userResponse);
     }
 
     private String normalizeIdentifier(String identifier) {
@@ -111,6 +108,23 @@ public class UserService implements IUserService {
 
     private User findUser(UUID userId) {
         return userRepository.findById(userId).orElseThrow(() -> new UserNotFoundException(userId.toString()));
+    }
+
+    private String validateUniqueEmail(String email){
+        String normalizedEmail = normalizeIdentifier(email);
+        if (userRepository.existsByEmail(normalizedEmail)) {
+            throw new EmailAlreadyExistsException(email);
+        }
+        return normalizedEmail;
+    }
+
+    private String validateUniqueUsername(String username){
+        String normalizedUsername = normalizeIdentifier(username);
+        if (userRepository.existsByUsername(normalizedUsername)) {
+            throw new UsernameAlreadyExistsException(username);
+        }
+
+        return normalizedUsername;
     }
 
 
