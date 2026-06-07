@@ -37,6 +37,10 @@ public class User {
     @Column(nullable = false)
     private boolean enabled = true;
 
+    @Builder.Default
+    @Column(nullable=false)
+    private boolean verified=false;
+
     @CreationTimestamp
     @Column(nullable = false)
     private LocalDateTime createdAt;

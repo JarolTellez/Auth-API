@@ -16,6 +16,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.HashSet;
+import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
 
@@ -85,19 +86,22 @@ public class UserService implements IUserService {
                 roleRepository.findAllById(request.roleIds())
         );
 
+        if (request.roleIds().size() != roles.size()) {
+            throw new RoleNotFoundException();
+        }
+
         String normalizedEmail = validateUniqueEmail(request.email());
         String normalizedUsername = validateUniqueUsername(request.username());
 
-
-        if(request.roleIds().size() != roles.size()){
-            throw new RoleNotFoundException();
+        if (!normalizedEmail.equals(user.getEmail()) || !normalizedUsername.equals(user.getUsername()) || !roles.equals(user.getRoles())) {
+            sessionService.revokeAllSessions(userId);
         }
 
         user.setRoles(roles);
         user.setUsername(normalizedUsername);
         user.setEmail(normalizedEmail);
-        User userResponse=userRepository.save(user);
-        sessionService.revokeAllSessions(userId);
+        User userResponse = userRepository.save(user);
+
 
         return userMapper.userToAdminUserResponse(userResponse);
     }
@@ -110,7 +114,7 @@ public class UserService implements IUserService {
         return userRepository.findById(userId).orElseThrow(() -> new UserNotFoundException(userId.toString()));
     }
 
-    private String validateUniqueEmail(String email){
+    private String validateUniqueEmail(String email) {
         String normalizedEmail = normalizeIdentifier(email);
         if (userRepository.existsByEmail(normalizedEmail)) {
             throw new EmailAlreadyExistsException(email);
@@ -118,7 +122,7 @@ public class UserService implements IUserService {
         return normalizedEmail;
     }
 
-    private String validateUniqueUsername(String username){
+    private String validateUniqueUsername(String username) {
         String normalizedUsername = normalizeIdentifier(username);
         if (userRepository.existsByUsername(normalizedUsername)) {
             throw new UsernameAlreadyExistsException(username);
