@@ -63,6 +63,11 @@ public class UserService implements IUserService {
     }
 
     @Override
+    public User saveUser(User user) {
+       return userRepository.save(user);
+    }
+
+    @Override
     public UserResponse updateUserStatus(UUID userId, boolean enabled) {
         User user = findUser(userId);
 

@@ -10,4 +10,11 @@ public class TokenExpiredException extends BusinessException{
                 HttpStatus.UNAUTHORIZED
         );
     }
+    public TokenExpiredException(String message){
+        super(
+                message,
+                ErrorCode.TOKEN_EXPIRED,
+                HttpStatus.UNAUTHORIZED
+        );
+    }
 }

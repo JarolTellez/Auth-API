@@ -5,6 +5,7 @@ import com.jarol.auth.auth_api.dto.request.LoginRequest;
 import com.jarol.auth.auth_api.dto.request.RegisterRequest;
 import com.jarol.auth.auth_api.dto.request.TokenRefreshRequest;
 import com.jarol.auth.auth_api.dto.response.AuthResponse;
+import com.jarol.auth.auth_api.dto.response.MessageResponse;
 import com.jarol.auth.auth_api.dto.response.TokenRefreshResponse;
 import com.jarol.auth.auth_api.service.IAuthService;
 import jakarta.servlet.http.HttpServletRequest;
@@ -22,35 +23,54 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class AuthController {
 
-    private  final IAuthService authService;
+    private final IAuthService authService;
 
     @PostMapping("/register")
-    public ResponseEntity<AuthResponse> register(@Valid @RequestBody RegisterRequest request, HttpServletRequest httpRequest){
-        AuthResponse response = authService.register(request, httpRequest);
-        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+    public ResponseEntity<MessageResponse> register(@Valid @RequestBody RegisterRequest request, HttpServletRequest httpRequest) {
+        authService.register(request, httpRequest);
+        return ResponseEntity.status(HttpStatus.CREATED).body(
+                new MessageResponse("Registration successful. Please verify your email")
+        );
     }
 
     @PostMapping("/login")
-    public ResponseEntity<AuthResponse> login(@Valid @RequestBody LoginRequest request, HttpServletRequest httpRequest){
+    public ResponseEntity<AuthResponse> login(@Valid @RequestBody LoginRequest request, HttpServletRequest httpRequest) {
         AuthResponse response = authService.login(request, httpRequest);
         return ResponseEntity.ok(response);
     }
 
     @PostMapping("/logout")
-    public ResponseEntity<Void> logout(@AuthenticationPrincipal CustomUserDetails user){
+    public ResponseEntity<Void> logout(@AuthenticationPrincipal CustomUserDetails user) {
 
         authService.logout(user.getSessionId(), user.getUserId());
         return ResponseEntity.noContent().build();
     }
 
     @PostMapping("/refresh")
-    public ResponseEntity<TokenRefreshResponse> refreshToken(@Valid @RequestBody TokenRefreshRequest request){
+    public ResponseEntity<TokenRefreshResponse> refreshToken(@Valid @RequestBody TokenRefreshRequest request) {
 
         TokenRefreshResponse response = authService.refreshToken(request.refreshToken());
 
         return ResponseEntity.ok().body(response);
     }
 
+
+    @GetMapping("/verify")
+    public ResponseEntity<?> verifyAccount(@RequestParam("token") String token) {
+        authService.verifyUserEmail(token);
+
+        return ResponseEntity.noContent().build();
+    }
+
+    @PostMapping("/resend-verification")
+    public ResponseEntity<Void> resendVerificationEmail(
+            @RequestParam String email,
+            HttpServletRequest request) {
+
+      //  authService.resendVerificationEmail(email, request);
+
+        return ResponseEntity.noContent().build();
+    }
 
 
 }

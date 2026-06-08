@@ -4,37 +4,19 @@ import com.jarol.auth.auth_api.config.JwtProperties;
 import com.jarol.auth.auth_api.dto.request.LoginRequest;
 import com.jarol.auth.auth_api.dto.request.RegisterRequest;
 import com.jarol.auth.auth_api.dto.response.AuthResponse;
-import com.jarol.auth.auth_api.dto.response.RevokeAllSessionsResponse;
 import com.jarol.auth.auth_api.dto.response.TokenRefreshResponse;
-import com.jarol.auth.auth_api.dto.response.UserResponse;
 import com.jarol.auth.auth_api.exception.*;
-import com.jarol.auth.auth_api.mapper.IAuthMapper;
-import com.jarol.auth.auth_api.mapper.IUserMapper;
-import com.jarol.auth.auth_api.model.Role;
 import com.jarol.auth.auth_api.model.Session;
 import com.jarol.auth.auth_api.model.User;
-import com.jarol.auth.auth_api.model.enums.EnumRole;
-import com.jarol.auth.auth_api.model.valueObject.SessionMetadata;
-import com.jarol.auth.auth_api.repository.IRoleRepository;
-import com.jarol.auth.auth_api.repository.ISessionRepository;
-import com.jarol.auth.auth_api.repository.IUserRepository;
-import com.jarol.auth.auth_api.service.parser.UserAgentParser;
+import com.jarol.auth.auth_api.model.VerificationToken;
+import org.springframework.beans.factory.annotation.Value;
 import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.Jwt;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.nio.charset.StandardCharsets;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-import java.time.Duration;
 import java.time.Instant;
-import java.time.LocalDateTime;
-import java.util.HexFormat;
-import java.util.Set;
 import java.util.UUID;
 
 @Service
@@ -43,20 +25,28 @@ public class AuthService implements IAuthService {
 
     private final IUserService userService;
     private final ISessionService sessionService;
+    private final IEmailService emailService;
+    private final IVerificationTokenService verificationTokenService;
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
     private final JwtProperties jwtProperties;
+    private final TokenHashService tokenHashService;
+
+    @Value("${app.backend-url}")
+    private String url;
 
     @Transactional
     @Override
-    public AuthResponse register(RegisterRequest request, HttpServletRequest httpRequest) {
-
-        String userAgent = httpRequest.getHeader("User-Agent");
-        String ip = extractIp(httpRequest);
-
+    public void register(RegisterRequest request, HttpServletRequest httpRequest) {
         User user = userService.createUser(request);
 
-        return sessionService.createSessionAndTokens(user, userAgent, ip);
+        String token= verificationTokenService.createOrUpdateToken(user);
+
+
+        String link = url+"/api/auth/verify?token="+token;
+
+        emailService.sendEmail(user.getEmail(),link);
+
     }
 
     @Override
@@ -76,6 +66,10 @@ public class AuthService implements IAuthService {
             throw new UserDisabledException();
         }
 
+        if(!user.isVerified()){
+            throw new UserNotVerifiedException();
+        }
+
         return sessionService.createSessionAndTokens(user, userAgent, ip);
     }
 
@@ -87,12 +81,28 @@ public class AuthService implements IAuthService {
     }
 
     @Override
+    public void verifyUserEmail(String token) {
+        VerificationToken verificationToken = verificationTokenService.validateAndGetToken(token);
+
+        User user = verificationToken.getUser();
+
+        if(user.isVerified()){
+            throw new UserAlreadyVerifiedException();
+        }
+        user.setVerified(true);
+
+        userService.saveUser(user);
+
+        verificationTokenService.deleteToken(verificationToken);
+    }
+
+    @Override
     public TokenRefreshResponse refreshToken(String refreshToken) {
 
         Claims claims = jwtService.parseAndValidateToken(refreshToken);
         UUID sessionId = UUID.fromString(claims.get("sessionId", String.class));
         String tokenType = claims.get("type", String.class);
-        String incomingHash = jwtService.hashRefreshToken(refreshToken);
+        String incomingHash = tokenHashService.hashToken(refreshToken);
         Instant now = Instant.now();
 
         if (!jwtProperties.getRefreshType().equals(tokenType)) {
@@ -140,6 +150,7 @@ public class AuthService implements IAuthService {
         return httpRequest.getRemoteAddr();
 
     }
+
 
 
 }

@@ -11,11 +11,14 @@ import java.util.UUID;
 
 public interface IAuthService {
 
-    AuthResponse register(RegisterRequest request, HttpServletRequest httpRequest);
+    //    AuthResponse register(RegisterRequest request, HttpServletRequest httpRequest);
+    void register(RegisterRequest request, HttpServletRequest httpRequest);
 
     AuthResponse login(LoginRequest request, HttpServletRequest httpRequest);
 
     void logout(UUID sessionId, UUID userId);
+
+    void verifyUserEmail(String token);
 
     TokenRefreshResponse refreshToken(String refreshToken);
 

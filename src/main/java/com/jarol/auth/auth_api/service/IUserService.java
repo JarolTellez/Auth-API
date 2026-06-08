@@ -14,6 +14,8 @@ User createUser(RegisterRequest request);
 
 User getUserByIdentifier(String identifier);
 
+User saveUser(User user);
+
 UserResponse updateUserStatus(UUID userId, boolean enabled);
 AdminUserResponse updateUser(UUID userId, AdminUpdateUserRequest request);
 }

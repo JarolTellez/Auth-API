@@ -55,18 +55,6 @@ public class JwtService {
                 .compact();
     }
 
-    public String hashRefreshToken(String refreshToken) {
-        try {
-            MessageDigest digest = MessageDigest.getInstance("SHA-256");
-            byte[] hash = digest.digest(refreshToken.getBytes(StandardCharsets.UTF_8));
-
-            return HexFormat.of().formatHex(hash);
-
-        } catch (NoSuchAlgorithmException e) {
-            throw new RuntimeException("SHA-256 algorithm not available", e);
-
-        }
-    }
 
     private SecretKey getSignKey() {
         return key;

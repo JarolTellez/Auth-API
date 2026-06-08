@@ -27,6 +27,7 @@ public class SessionService implements ISessionService {
     private final UserAgentParser userAgentParser;
     private final ISessionRepository sessionRepository;
     private final JwtService jwtService;
+    private final TokenHashService tokenHashService;
     private final IAuthMapper authMapper;
     private final ISessionMapper iSessionMapper;
 
@@ -41,7 +42,7 @@ public class SessionService implements ISessionService {
         String accessToken = jwtService.generateAccessToken(user, sessionId);
         String refreshToken = jwtService.generateRefreshToken(user, sessionId);
 
-        String hash = jwtService.hashRefreshToken(refreshToken);
+        String hash = tokenHashService.hashToken(refreshToken);
 
         Session session = Session.builder()
                 .id(sessionId)
