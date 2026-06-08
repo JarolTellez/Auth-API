@@ -16,6 +16,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
 import java.time.Instant;
 import java.util.UUID;
 
@@ -40,12 +41,7 @@ public class AuthService implements IAuthService {
     public void register(RegisterRequest request, HttpServletRequest httpRequest) {
         User user = userService.createUser(request);
 
-        String token= verificationTokenService.createOrUpdateToken(user);
-
-
-        String link = url+"/api/auth/verify?token="+token;
-
-        emailService.sendEmail(user.getEmail(),link);
+        sendVerificationEmail(user);
 
     }
 
@@ -66,7 +62,7 @@ public class AuthService implements IAuthService {
             throw new UserDisabledException();
         }
 
-        if(!user.isVerified()){
+        if (!user.isVerified()) {
             throw new UserNotVerifiedException();
         }
 
@@ -81,12 +77,12 @@ public class AuthService implements IAuthService {
     }
 
     @Override
-    public void verifyUserEmail(String token) {
+    public void verifyEmail(String token) {
         VerificationToken verificationToken = verificationTokenService.validateAndGetToken(token);
 
         User user = verificationToken.getUser();
 
-        if(user.isVerified()){
+        if (user.isVerified()) {
             throw new UserAlreadyVerifiedException();
         }
         user.setVerified(true);
@@ -95,6 +91,19 @@ public class AuthService implements IAuthService {
         userService.saveUser(user);
 
         verificationTokenService.deleteToken(verificationToken);
+    }
+
+    @Override
+    public void resendVerificationEmail(String email) {
+        try {
+            User user = userService.getUserByIdentifier(email);
+            if (user.isVerified()) {
+                throw new UserAlreadyVerifiedException();
+            }
+            sendVerificationEmail(user);
+        }catch (UserNotFoundException ignored){
+
+        }
     }
 
     @Override
@@ -152,6 +161,13 @@ public class AuthService implements IAuthService {
 
     }
 
+    private void sendVerificationEmail(User user) {
+        String token = verificationTokenService.createOrUpdateToken(user);
+
+        String link = url + "/api/auth/verify?token=" + token;
+
+        emailService.sendEmail(user.getEmail(), link);
+    }
 
 
 }

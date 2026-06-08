@@ -23,16 +23,20 @@ public class VerificationTokenService implements IVerificationTokenService{
 
     @Override
     public String createOrUpdateToken(User user) {
-        VerificationToken verificationToken=  verificationTokenRepository.findByUser(user).orElse(VerificationToken.builder().build());
+        verificationTokenRepository.findByUser(user)
+                .ifPresent(verificationTokenRepository::delete);
 
-        String token= UUID.randomUUID().toString();
+        String token = UUID.randomUUID().toString();
         String tokenHash = tokenHashService.hashToken(token);
 
-        verificationToken.setTokenHash(tokenHash);
-        verificationToken.setUser(user);
-        verificationToken.setExpiresAt(Instant.now().plus(Duration.ofMinutes(15)));
+        VerificationToken verificationToken = VerificationToken.builder()
+                .tokenHash(tokenHash)
+                .user(user)
+                .expiresAt(Instant.now().plus(Duration.ofMinutes(15)))
+                .build();
 
         verificationTokenRepository.save(verificationToken);
+
         return token;
     }
 

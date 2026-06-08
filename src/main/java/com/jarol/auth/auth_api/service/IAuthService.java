@@ -18,7 +18,9 @@ public interface IAuthService {
 
     void logout(UUID sessionId, UUID userId);
 
-    void verifyUserEmail(String token);
+    void verifyEmail(String token);
+
+    void resendVerificationEmail(String email);
 
     TokenRefreshResponse refreshToken(String refreshToken);
 

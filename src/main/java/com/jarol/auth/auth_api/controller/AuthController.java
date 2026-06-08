@@ -3,6 +3,7 @@ package com.jarol.auth.auth_api.controller;
 import com.jarol.auth.auth_api.config.CustomUserDetails;
 import com.jarol.auth.auth_api.dto.request.LoginRequest;
 import com.jarol.auth.auth_api.dto.request.RegisterRequest;
+import com.jarol.auth.auth_api.dto.request.ResendVerificationRequest;
 import com.jarol.auth.auth_api.dto.request.TokenRefreshRequest;
 import com.jarol.auth.auth_api.dto.response.AuthResponse;
 import com.jarol.auth.auth_api.dto.response.MessageResponse;
@@ -16,7 +17,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.UUID;
+
 
 @RestController
 @RequestMapping("/api/auth")
@@ -40,10 +41,10 @@ public class AuthController {
     }
 
     @PostMapping("/logout")
-    public ResponseEntity<Void> logout(@AuthenticationPrincipal CustomUserDetails user) {
+    public ResponseEntity<MessageResponse> logout(@AuthenticationPrincipal CustomUserDetails user) {
 
         authService.logout(user.getSessionId(), user.getUserId());
-        return ResponseEntity.noContent().build();
+        return ResponseEntity.ok(new MessageResponse("Successfully logged out"));
     }
 
     @PostMapping("/refresh")
@@ -51,25 +52,25 @@ public class AuthController {
 
         TokenRefreshResponse response = authService.refreshToken(request.refreshToken());
 
-        return ResponseEntity.ok().body(response);
+        return ResponseEntity.ok(response);
     }
 
 
     @GetMapping("/verify")
-    public ResponseEntity<?> verifyAccount(@RequestParam("token") String token) {
-        authService.verifyUserEmail(token);
+    public ResponseEntity<MessageResponse> verifyAccount(@RequestParam("token") String token) {
+        authService.verifyEmail(token);
 
-        return ResponseEntity.noContent().build();
+        return ResponseEntity.ok(new MessageResponse("Email verified successfully."));
     }
 
     @PostMapping("/resend-verification")
-    public ResponseEntity<Void> resendVerificationEmail(
-            @RequestParam String email,
-            HttpServletRequest request) {
+    public ResponseEntity<MessageResponse> resendVerificationEmail(
+            @Valid
+            @RequestBody ResendVerificationRequest request) {
 
-      //  authService.resendVerificationEmail(email, request);
+       authService.resendVerificationEmail(request.email());
 
-        return ResponseEntity.noContent().build();
+        return ResponseEntity.ok(new MessageResponse("If the account exists and is not verified, a verification email has been sent."));
     }
 
 
