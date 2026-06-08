@@ -90,6 +90,7 @@ public class AuthService implements IAuthService {
             throw new UserAlreadyVerifiedException();
         }
         user.setVerified(true);
+        user.setVerifiedAt(Instant.now());
 
         userService.saveUser(user);
 

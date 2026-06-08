@@ -5,11 +5,11 @@ import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
+import java.time.Instant;
 import java.util.Set;
 import java.util.UUID;
 
 import java.time.LocalDateTime;
-
 
 
 @Getter
@@ -38,15 +38,18 @@ public class User {
     private boolean enabled = true;
 
     @Builder.Default
-    @Column(nullable=false)
-    private boolean verified=false;
+    @Column(nullable = false)
+    private boolean verified = false;
+
+    private Instant verifiedAt;
 
     @CreationTimestamp
     @Column(nullable = false)
-    private LocalDateTime createdAt;
+    private Instant createdAt;
 
     @UpdateTimestamp
-    private LocalDateTime updatedAt;
+    private Instant updatedAt;
+
 
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
