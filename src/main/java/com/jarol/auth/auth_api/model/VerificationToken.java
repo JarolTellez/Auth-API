@@ -28,7 +28,16 @@ public class VerificationToken {
     private User user;
 
     @Column(nullable = false)
-    private Instant expiresAt = Instant.now().plusSeconds(15 * 60);
+    private Instant expiresAt;
+    
+    @Column(nullable = false)
+    private int resendCount;
+
+    @Column(nullable = false)
+    private Instant firstResendAt;
+    
+    @Column(nullable = false)
+    private Instant lastEmailSentAt;
 
     public boolean isExpired() {
         return Instant.now().isAfter(this.expiresAt);

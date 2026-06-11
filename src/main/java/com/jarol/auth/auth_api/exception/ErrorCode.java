@@ -16,5 +16,6 @@ public enum ErrorCode {
     INVALID_TOKEN,
     TOKEN_EXPIRED,
     TOKEN_NOT_FOUND,
-    ACCESS_DENIED
+    ACCESS_DENIED,
+    TOO_MANY_REQUESTS
 }

@@ -36,6 +36,8 @@ public class AuthService implements IAuthService {
     @Value("${app.backend-url}")
     private String url;
 
+
+
     @Transactional
     @Override
     public void register(RegisterRequest request, HttpServletRequest httpRequest) {
