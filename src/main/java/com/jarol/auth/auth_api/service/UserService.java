@@ -58,7 +58,7 @@ public class UserService implements IUserService {
         return userRepository
                 .findByEmailOrUsername(normalizedIdentifier, normalizedIdentifier)
                 .orElseThrow(() ->
-                        new UserNotFoundException(identifier)
+                        new InvalidCredentialsException()
                 );
     }
 
@@ -116,7 +116,7 @@ public class UserService implements IUserService {
     }
 
     private User findUser(UUID userId) {
-        return userRepository.findById(userId).orElseThrow(() -> new UserNotFoundException(userId.toString()));
+        return userRepository.findById(userId).orElseThrow(() -> new InvalidCredentialsException());
     }
 
     private String validateUniqueEmail(String email) {

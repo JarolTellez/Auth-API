@@ -6,7 +6,7 @@ public class InvalidCredentialsException extends BusinessException{
 
     public  InvalidCredentialsException(){
         super(
-                "Invalid email/username or password",
+                "Invalid credentials",
                 ErrorCode.INVALID_CREDENTIALS,
                 HttpStatus.UNAUTHORIZED
         );

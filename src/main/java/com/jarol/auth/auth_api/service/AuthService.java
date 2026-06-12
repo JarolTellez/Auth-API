@@ -36,6 +36,14 @@ public class AuthService implements IAuthService {
     @Value("${app.backend-url}")
     private String url;
 
+    @Value("${app.login.max-failed-attempts}")
+    private int maxFailedLoginAttempts;
+
+    @Value("${app.login.failed-attempt-window-seconds}")
+    private long failedWindowAttempts;
+
+    @Value("${app.login.account-lock-duration-seconds}")
+    private long lockDurationSeconds;
 
 
     @Transactional
@@ -52,11 +60,24 @@ public class AuthService implements IAuthService {
         String userAgent = httpRequest.getHeader("User-Agent");
         String ip = extractIp(httpRequest);
         User user = userService.getUserByIdentifier(request.identifier());
+        Instant now = Instant.now();
+
+        if (user.getAccountLockedUntil() != null) {
+
+            if (user.getAccountLockedUntil().isAfter(now)) {
+                 throw new AccountLockedException();
+            }
+
+            user.setAccountLockedUntil(null);
+            user.setFailedLoginAttempts(0);
+            userService.saveUser(user);
+        }
 
         if (!passwordEncoder.matches(
                 request.password(),
                 user.getPassword()
         )) {
+            manageLoginFailedAttempts(user);
             throw new InvalidCredentialsException();
         }
 
@@ -67,6 +88,12 @@ public class AuthService implements IAuthService {
         if (!user.isVerified()) {
             throw new UserNotVerifiedException();
         }
+
+        user.setLastLoginAt(now);
+        user.setFailedLoginAttempts(0);
+        user.setLastFailedLoginAttempt(null);
+
+        userService.saveUser(user);
 
         return sessionService.createSessionAndTokens(user, userAgent, ip);
     }
@@ -103,7 +130,7 @@ public class AuthService implements IAuthService {
                 throw new UserAlreadyVerifiedException();
             }
             sendVerificationEmail(user);
-        }catch (UserNotFoundException ignored){
+        } catch (UserNotFoundException ignored) {
 
         }
     }
@@ -169,6 +196,36 @@ public class AuthService implements IAuthService {
         String link = url + "/api/auth/verify?token=" + token;
 
         emailService.sendEmail(user.getEmail(), link);
+    }
+
+    private void manageLoginFailedAttempts(User user) {
+
+        Instant now = Instant.now();
+
+        if (user.getLastFailedLoginAttempt() == null ||
+                user.getLastFailedLoginAttempt()
+                        .plusSeconds(failedWindowAttempts)
+                        .isBefore(now)) {
+
+            user.setFailedLoginAttempts(1);
+
+        } else {
+
+            user.setFailedLoginAttempts(
+                    user.getFailedLoginAttempts() + 1
+            );
+        }
+
+        user.setLastFailedLoginAttempt(now);
+
+        if (user.getFailedLoginAttempts() >= maxFailedLoginAttempts) {
+
+            user.setAccountLockedUntil(
+                    now.plusSeconds(lockDurationSeconds)
+            );
+        }
+
+        userService.saveUser(user);
     }
 
 

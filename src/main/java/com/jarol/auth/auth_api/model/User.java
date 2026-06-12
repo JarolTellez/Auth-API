@@ -51,6 +51,15 @@ public class User {
     private Instant updatedAt;
 
 
+    private int failedLoginAttempts;
+
+    private Instant lastFailedLoginAttempt;
+
+    private Instant accountLockedUntil;
+
+    private Instant lastLoginAt;
+
+
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
             name = "user_roles",
