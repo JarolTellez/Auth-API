@@ -73,10 +73,10 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(HttpMessageNotReadableException.class)
-    public ResponseEntity<ApiError> handleHttpMessageNotReadable(HttpMessageNotReadableException ex, HttpServletRequest request){
+    public ResponseEntity<ApiError> handleHttpMessageNotReadable(HttpMessageNotReadableException ex, HttpServletRequest request) {
         log.warn("Malformed request body: {}", ex.getMessage());
 
-        ApiError error=new ApiError(
+        ApiError error = new ApiError(
                 HttpStatus.BAD_REQUEST.value(),
                 ErrorCode.VALIDATION_ERROR.name(),
                 "Request body is required or malformed",
@@ -112,6 +112,25 @@ public class GlobalExceptionHandler {
         return ResponseEntity.badRequest().body(error);
 
 
+    }
+
+    @ExceptionHandler(InvalidPaginationException.class)
+    public ResponseEntity<ApiError> handleInvalidPagination(
+            InvalidPaginationException ex,
+            HttpServletRequest request) {
+
+        log.warn("Pagination error: {}", ex.getMessage());
+
+        ApiError error = new ApiError(
+                HttpStatus.BAD_REQUEST.value(),
+                ErrorCode.INVALID_PARAMETERS.name(),
+                ex.getMessage(),
+                Instant.now(),
+                request.getRequestURI(),
+                null
+        );
+
+        return ResponseEntity.badRequest().body(error);
     }
 
     @ExceptionHandler(ConstraintViolationException.class)

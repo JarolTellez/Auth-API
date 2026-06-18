@@ -1,6 +1,8 @@
 package com.jarol.auth.auth_api.repository;
 
 import com.jarol.auth.auth_api.model.User;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.awt.dnd.DragSourceMotionListener;
@@ -16,5 +18,6 @@ public interface IUserRepository extends JpaRepository<User, UUID> {
 
     Optional<User> findByEmailOrUsername(String email, String username);
 
-
+    @Override
+    Page<User> findAll(Pageable pageable);
 }

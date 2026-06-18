@@ -1,6 +1,8 @@
 package com.jarol.auth.auth_api.repository;
 
 import com.jarol.auth.auth_api.model.Session;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -31,4 +33,5 @@ public interface ISessionRepository extends JpaRepository<Session, UUID> {
 
     List<Session> findByUserIdAndRevokedFalse(UUID userId);
 
+    Page<Session> findByUserId(UUID userId, Pageable pageable);
 }

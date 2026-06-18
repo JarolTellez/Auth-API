@@ -1,9 +1,6 @@
 package com.jarol.auth.auth_api.service;
 
-import com.jarol.auth.auth_api.dto.response.AuthResponse;
-import com.jarol.auth.auth_api.dto.response.RevokeAllSessionsResponse;
-import com.jarol.auth.auth_api.dto.response.SessionResponse;
-import com.jarol.auth.auth_api.dto.response.SessionsResponse;
+import com.jarol.auth.auth_api.dto.response.*;
 import com.jarol.auth.auth_api.model.Session;
 import com.jarol.auth.auth_api.model.User;
 import com.jarol.auth.auth_api.model.valueObject.SessionMetadata;

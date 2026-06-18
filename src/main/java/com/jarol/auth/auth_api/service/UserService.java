@@ -1,22 +1,27 @@
 package com.jarol.auth.auth_api.service;
 
+import com.jarol.auth.auth_api.dto.request.PaginationRequest;
 import com.jarol.auth.auth_api.dto.request.RegisterRequest;
 import com.jarol.auth.auth_api.dto.request.AdminUpdateUserRequest;
 import com.jarol.auth.auth_api.dto.response.AdminUserResponse;
+import com.jarol.auth.auth_api.dto.response.PaginatedResponse;
 import com.jarol.auth.auth_api.dto.response.UserResponse;
 import com.jarol.auth.auth_api.exception.*;
 import com.jarol.auth.auth_api.mapper.IUserMapper;
 import com.jarol.auth.auth_api.model.Role;
 import com.jarol.auth.auth_api.model.User;
 import com.jarol.auth.auth_api.model.enums.EnumRole;
+import com.jarol.auth.auth_api.pagination.PageableFactory;
+import com.jarol.auth.auth_api.pagination.SortValidator;
 import com.jarol.auth.auth_api.repository.IRoleRepository;
 import com.jarol.auth.auth_api.repository.IUserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.HashSet;
-import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
 
@@ -29,6 +34,7 @@ public class UserService implements IUserService {
     private final IUserMapper userMapper;
     private final IRoleRepository roleRepository;
     private final ISessionService sessionService;
+    private final PageableFactory pageableFactory;
 
     @Override
     public User createUser(RegisterRequest request) {
@@ -63,8 +69,28 @@ public class UserService implements IUserService {
     }
 
     @Override
+    public PaginatedResponse<AdminUserResponse> getUsers(
+            PaginationRequest request
+    ) {
+
+        Pageable pageable =
+                pageableFactory.create(
+                        request,
+                        SortValidator.validate(request.sortBy())
+                );
+
+        Page<User> users =
+                userRepository.findAll(pageable);
+
+        Page<AdminUserResponse> responses =
+                users.map(userMapper::userToAdminUserResponse);
+
+        return PaginatedResponse.from(responses);
+    }
+
+    @Override
     public User saveUser(User user) {
-       return userRepository.save(user);
+        return userRepository.save(user);
     }
 
     @Override
